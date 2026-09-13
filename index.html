@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>girlcode social wall</title>
+  <meta name="description" content="A soft social wall for girls who met IRL and want to stay connected online." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <main class="shell">
+    <header class="browser">
+      <div class="browser-left">
+        <button class="chrome-btn" id="browserBack" type="button" aria-label="Back">‹</button>
+        <button class="chrome-btn" id="browserForward" type="button" aria-label="Forward">›</button>
+      </div>
+      <div class="address">
+        <button class="address-icon home" id="browserHome" type="button" aria-label="Home">⌂</button>
+        <span class="address-text">girlcode-socialwall</span>
+        <button class="address-icon refresh" id="browserRefresh" type="button" aria-label="Refresh">↻</button>
+      </div>
+      <button class="plus" id="openFormNav" type="button" aria-label="Add yourself">＋</button>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">girls' vibe coding · kl · 12.09.26</div>
+      <h1>
+        we met <em>irl.</em><br>
+        stay <span class="highlight-wrap"><span class="highlight">connected</span></span> <em>online.</em>
+      </h1>
+      <p class="sub">a tiny people wall for the girls in the room ♡</p>
+
+      <div class="hero-actions">
+        <button class="primary" id="openForm" type="button">+ add me</button>
+        <button class="ghost" id="copyLink" type="button">copy page link</button>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div>
+        <div class="tiny">who's here?</div>
+        <div class="count"><span id="count">6</span> girls on the wall</div>
+      </div>
+      <div class="filter-wrap">
+        <input id="search" type="search" placeholder="find someone..." autocomplete="off">
+      </div>
+    </section>
+
+    <section class="wall" id="wall" aria-live="polite"></section>
+
+    <footer>
+      <span>made for one room, one afternoon, and a lot of new mutuals ✶</span>
+      <button id="openFormFooter" type="button">add yourself ↗</button>
+    </footer>
+  </main>
+
+  <dialog id="profileDialog">
+    <form method="dialog" class="sheet" id="profileForm">
+      <div class="sheet-head">
+        <div>
+          <div class="tiny">join the wall</div>
+          <h2>add your little corner ♡</h2>
+        </div>
+        <button class="close" id="closeDialog" type="button" aria-label="Close">×</button>
+      </div>
+
+      <label>
+        <span>name</span>
+        <input name="name" required maxlength="40" placeholder="Olivia">
+      </label>
+
+      <label>
+        <span>instagram username</span>
+        <div class="input-prefix">
+          <b>@</b>
+          <input name="instagram" required maxlength="60" placeholder="olivia.lim31">
+        </div>
+      </label>
+
+      <label>
+        <span>linkedin <i>optional</i></span>
+        <input name="linkedin" placeholder="linkedin.com/in/yourname">
+      </label>
+
+      <label>
+        <span>come talk to me about...</span>
+        <input name="about" maxlength="90" placeholder="creative tech, skating, random side quests">
+      </label>
+
+      <label>
+        <span>profile photo <i>optional</i></span>
+        <input name="photo" type="file" accept="image/*">
+      </label>
+
+      <fieldset>
+        <legend>pick a card vibe</legend>
+        <div class="swatches">
+          <label><input type="radio" name="tone" value="rose" checked><span class="swatch rose"></span></label>
+          <label><input type="radio" name="tone" value="olive"><span class="swatch olive"></span></label>
+          <label><input type="radio" name="tone" value="lilac"><span class="swatch lilac"></span></label>
+          <label><input type="radio" name="tone" value="cream"><span class="swatch cream"></span></label>
+          <label><input type="radio" name="tone" value="blue"><span class="swatch blue"></span></label>
+        </div>
+      </fieldset>
+
+      <button class="submit" type="submit">add me to the wall ✦</button>
+      <p class="micro">This demo stores new cards only in this browser. Connect Supabase later for a shared live wall.</p>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <template id="cardTemplate">
+    <article class="person-card">
+      <div class="sticker star">✦</div>
+      <div class="portrait-wrap">
+        <div class="portrait"></div>
+      </div>
+      <div class="person-copy">
+        <div class="name-row">
+          <h3></h3>
+          <span class="dot">●</span>
+        </div>
+        <a class="handle" target="_blank" rel="noreferrer"></a>
+        <p class="about"></p>
+        <div class="links">
+          <a class="pill ig" target="_blank" rel="noreferrer">instagram ↗</a>
+          <a class="pill li" target="_blank" rel="noreferrer">linkedin ↗</a>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
