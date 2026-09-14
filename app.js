@@ -16,7 +16,129 @@ const search = document.querySelector("#search");
 const toast = document.querySelector("#toast");
 const openers = ["#openForm", "#openFormFooter", "#openFormNav"].map(sel => document.querySelector(sel)).filter(Boolean);
 const closeDialogBtn = document.querySelector("#closeDialog");
-let people = [...seed, ...JSON.parse(localStorage.getItem("girlcode-socialwall-people") || "[]")];
+const frontendConfig = window.GIRLCODE_SUPABASE || {};
+const supabaseUrl = String(frontendConfig.url || "").replace(/\/$/, "");
+const publishableKey = String(frontendConfig.publishableKey || "");
+const profileFunctionUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/profiles` : "";
+const backendEnabled = Boolean(supabaseUrl && publishableKey && window.supabase?.createClient);
+const authClient = backendEnabled ? window.supabase.createClient(supabaseUrl, publishableKey) : null;
+
+async function createProfileOnBackend(person){
+  if(!backendEnabled) throw new Error("Supabase frontend config is missing. Copy config.example.js to config.js first.");
+  const {data: {session}} = await authClient.auth.getSession();
+  if(!session?.access_token) throw new Error("Please sign in before adding a profile.");
+
+  const response = await fetch(profileFunctionUrl, {
+    method: "POST",
+    headers: {
+      "apikey": publishableKey,
+      "Authorization": `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: person.name,
+      instagram: person.ig,
+      linkedin: person.linkedin || null,
+      about: person.about || null,
+      tone: person.tone,
+    }),
+  });
+
+  const result = await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(result.error || `Profile request failed (${response.status}).`);
+  return result.data;
+}
+function readStoredArray(key){
+  const data = JSON.parse(localStorage.getItem(key) || "[]");
+  if(!Array.isArray(data)) throw new Error("Invalid stored data");
+  return data;
+}
+let localPeople = [];
+try { localPeople = readStoredArray("girlcode-socialwall-people"); }
+catch { showToast("Saved profiles couldn't be loaded. Please try again later."); }
+// Keep the original IDs so existing notes stay with the correct person.
+const seedProfiles = seed.map((p, i)=>({...p, id:`seed-${i}`}));
+const orderedSeedProfiles = [seedProfiles[2], ...seedProfiles.filter(p=>p.id !== "seed-2")];
+let people = [...orderedSeedProfiles, ...localPeople
+  .filter(p=>p && typeof p.name === "string" && typeof p.ig === "string")
+  .map((p, i)=>({...p, id:p.id || `legacy-${i}`}))];
+const detailDialog = document.querySelector("#detailDialog");
+const messageForm = document.querySelector("#messageForm");
+const messageKey = "girlcode-socialwall-messages";
+let activePerson = null;
+
+function safeLinkedIn(value){
+  try {
+    const url = new URL(cleanLinkedIn(value));
+    if(url.protocol !== "https:" || !(url.hostname === "linkedin.com" || url.hostname.endsWith(".linkedin.com")) || url.username || url.password) return "";
+    return url.href;
+  } catch { return ""; }
+}
+
+function renderMessages(){
+  const list = document.querySelector("#messageList");
+  list.replaceChildren();
+  const messages = readStoredArray(messageKey).filter(m=>m && m.personId === activePerson.id && typeof m.author === "string" && typeof m.message === "string");
+  if(!messages.length){
+    const empty = document.createElement("li");
+    empty.className = "empty-notes";
+    empty.textContent = "No notes yet. Be the first to say hi ♡";
+    list.append(empty);
+  }
+  messages.forEach(m=>{
+    const item = document.createElement("li");
+    const author = document.createElement("strong");
+    author.textContent = m.author;
+    const body = document.createElement("p");
+    body.textContent = m.message;
+    item.append(author, body);
+    list.append(item);
+  });
+}
+
+function openProfile(person){
+  activePerson = person;
+  document.querySelector("#detailName").textContent = person.name;
+  document.querySelector("#detailHandle").textContent = `@${person.ig}`;
+  document.querySelector("#detailAbout").textContent = person.about || "say hi if you see me around ♡";
+  const portrait = document.querySelector("#detailPortrait");
+  portrait.style.backgroundImage = person.photo ? `url(${person.photo})` : "";
+  portrait.textContent = person.photo ? "" : initials(person.name);
+  document.querySelector("#detailInstagram").href = `https://instagram.com/${encodeURIComponent(person.ig)}`;
+  const linkedin = safeLinkedIn(person.linkedin || "");
+  const link = document.querySelector("#detailLinkedIn");
+  link.hidden = !linkedin;
+  if(linkedin) link.href = linkedin;
+  else link.removeAttribute("href");
+  document.querySelector("#missingLinkedIn").hidden = Boolean(linkedin);
+  messageForm.reset();
+  document.querySelector("#messageError").textContent = "";
+  try { renderMessages(); }
+  catch { document.querySelector("#messageError").textContent = "Couldn't load saved notes. Please try again later."; }
+  detailDialog.showModal();
+  detailDialog.scrollTop = 0;
+}
+document.querySelector("#closeDetail").addEventListener("click", ()=>detailDialog.close());
+detailDialog.addEventListener("click", e=>{ if(e.target === detailDialog) detailDialog.close(); });
+messageForm.addEventListener("submit", e=>{
+  e.preventDefault();
+  const error = document.querySelector("#messageError");
+  const author = messageForm.elements.author.value.trim();
+  const message = messageForm.elements.message.value.trim();
+  if(!activePerson || !author || !message){
+    error.textContent = "Please enter your name and a message.";
+    return;
+  }
+  try {
+    const messages = readStoredArray(messageKey);
+    messages.push({id:crypto.randomUUID(), personId:activePerson.id, author, message, createdAt:new Date().toISOString()});
+    localStorage.setItem(messageKey, JSON.stringify(messages));
+    messageForm.reset();
+    error.textContent = "";
+    renderMessages();
+    showToast("Your note is saved in this browser ♡");
+  } catch { error.textContent = "Couldn't save your note. Your text is still here; please try again."; }
+});
 
 const initials = (name="") => name.split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase();
 
@@ -40,11 +162,10 @@ function render(list=people){
   wall.innerHTML="";
   list.forEach((p, i)=>{
     const node = tpl.content.firstElementChild.cloneNode(true);
-    node.classList.add(p.tone || ["rose","olive","lilac","cream","blue"][i%5]);
+    node.classList.add(["rose","olive","lilac","cream","blue"].includes(p.tone) ? p.tone : "rose");
     node.querySelector("h3").textContent = p.name;
     const handle = node.querySelector(".handle");
     handle.textContent = `@${p.ig}`;
-    handle.href = `https://instagram.com/${encodeURIComponent(p.ig)}`;
     node.querySelector(".about").textContent = p.about || "say hi if you see me around ♡";
     const portrait = node.querySelector(".portrait");
     if(p.photo){
@@ -53,14 +174,11 @@ function render(list=people){
     } else {
       portrait.textContent = initials(p.name);
     }
-    const ig = node.querySelector(".ig");
-    ig.href = `https://instagram.com/${encodeURIComponent(p.ig)}`;
-    const li = node.querySelector(".li");
-    if(p.linkedin){
-      li.href = p.linkedin;
-    } else {
-      li.remove();
-    }
+    node.querySelector(".social-summary").textContent = safeLinkedIn(p.linkedin || "") ? "instagram · linkedin" : "instagram";
+    const open = node.querySelector(".card-open");
+    open.setAttribute("aria-label", `View ${p.name}'s profile and leave a note`);
+    open.setAttribute("aria-haspopup", "dialog");
+    open.addEventListener("click", ()=>openProfile(p));
     wall.appendChild(node);
   });
   count.textContent = list.length;
@@ -157,6 +275,7 @@ form.addEventListener("submit", async (e)=>{
     const fd = new FormData(form);
     const file = fd.get("photo");
     const person = {
+      id: crypto.randomUUID(),
       name: fd.get("name").trim(),
       ig: cleanIg(fd.get("instagram")),
       linkedin: cleanLinkedIn(fd.get("linkedin")),
@@ -165,13 +284,34 @@ form.addEventListener("submit", async (e)=>{
       photo:""
     };
 
+    if(!person.name || !/^[a-zA-Z0-9._]{1,30}$/.test(person.ig)){
+      showToast("Please enter a name and a valid Instagram username.");
+      return;
+    }
+    if(person.linkedin && !safeLinkedIn(person.linkedin)){
+      showToast("Please enter a valid HTTPS LinkedIn profile link.");
+      return;
+    }
+
     if(file && file.size){
       person.photo = await compressImage(file);
     }
 
-    const local = JSON.parse(localStorage.getItem("girlcode-socialwall-people") || "[]");
-    local.push(person);
-    localStorage.setItem("girlcode-socialwall-people", JSON.stringify(local));
+    let saved = null;
+    if(backendEnabled){
+      saved = await createProfileOnBackend(person);
+      person.id = saved.id;
+      person.ig = saved.instagram;
+      person.linkedin = saved.linkedin || "";
+      person.about = saved.about || "";
+      person.tone = saved.tone;
+      // Avatar upload will be connected to Supabase Storage separately.
+      person.photo = "";
+    } else {
+      const local = readStoredArray("girlcode-socialwall-people");
+      local.push(person);
+      localStorage.setItem("girlcode-socialwall-people", JSON.stringify(local));
+    }
     people.push(person);
     search.value = "";
     render();
@@ -181,7 +321,7 @@ form.addEventListener("submit", async (e)=>{
     setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}), 80);
   } catch (err){
     console.error(err);
-    showToast("couldn’t add the profile — try a smaller photo");
+    showToast(err.message || "couldn’t add the profile — try again");
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = originalLabel;
