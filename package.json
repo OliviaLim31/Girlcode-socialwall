@@ -1,0 +1,27 @@
+{
+  "name": "girlcode-socialwall",
+  "version": "1.0.0",
+  "description": "A one-page social wall for the Girls' Vibe Coding session.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OliviaLim31/Girlcode-socialwall.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OliviaLim31/Girlcode-socialwall/issues"
+  },
+  "homepage": "https://github.com/OliviaLim31/Girlcode-socialwall#readme",
+  "dependencies": {
+    "@supabase/server": "^1.6.0",
+    "@supabase/supabase-js": "^2.116.0"
+  },
+  "devDependencies": {
+    "supabase": "^2.117.0"
+  }
+}
