@@ -116,6 +116,34 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <dialog id="detailDialog" aria-labelledby="detailName">
+    <div class="sheet detail-sheet">
+      <div class="sheet-head">
+        <div><div class="tiny">a little more about me</div><h2 id="detailName"></h2></div>
+        <button class="close" id="closeDetail" type="button" aria-label="Close profile">×</button>
+      </div>
+      <div class="detail-portrait portrait" id="detailPortrait" aria-hidden="true"></div>
+      <p id="detailHandle" class="handle"></p>
+      <p id="detailAbout" class="detail-about"></p>
+      <div class="links">
+        <a id="detailInstagram" class="pill" target="_blank" rel="noreferrer">instagram ↗</a>
+        <a id="detailLinkedIn" class="pill" target="_blank" rel="noreferrer">linkedin ↗</a>
+        <span id="missingLinkedIn" class="pill unavailable">linkedin · not provided</span>
+      </div>
+      <section class="guestbook" aria-labelledby="guestbookTitle">
+        <h3 id="guestbookTitle">leave a little note ♡</h3>
+        <p class="note-help">A kind thought, an idea, or just a hello. Notes here are saved only in this browser and aren't sent to this person.</p>
+        <ul id="messageList" class="message-list" aria-live="polite"></ul>
+        <form id="messageForm">
+          <label><span>your name</span><input name="author" required maxlength="40" placeholder="Your name" autocomplete="name"></label>
+          <label><span>your message</span><textarea name="message" required maxlength="1000" rows="3" placeholder="So lovely meeting you…"></textarea></label>
+          <p id="messageError" class="form-error" role="alert"></p>
+          <button class="submit" type="submit">leave a note ✦</button>
+        </form>
+      </section>
+    </div>
+  </dialog>
+
   <template id="cardTemplate">
     <article class="person-card">
       <div class="sticker star">✦</div>
@@ -127,16 +155,18 @@
           <h3></h3>
           <span class="dot">●</span>
         </div>
-        <a class="handle" target="_blank" rel="noreferrer"></a>
+        <span class="handle"></span>
         <p class="about"></p>
         <div class="links">
-          <a class="pill ig" target="_blank" rel="noreferrer">instagram ↗</a>
-          <a class="pill li" target="_blank" rel="noreferrer">linkedin ↗</a>
+          <span class="social-summary"></span>
         </div>
+        <button class="card-open" type="button">view profile & leave a note ↗</button>
       </div>
     </article>
   </template>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
