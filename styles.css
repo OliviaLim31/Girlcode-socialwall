@@ -4,7 +4,7 @@
   --line:rgba(35,35,31,.14);
   --rose:#d892aa;
   --olive:#aeb86f;
-  --lilac:#b7abb8;
+  --lilac:#9d7fc2;
   --cream:#e4dac1;
   --blue:#b9d5e8;
   --glass:rgba(246,243,236,.35);
@@ -109,7 +109,7 @@ button{font:inherit;cursor:pointer}
 .person-card:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 30px 80px rgba(39,46,38,.17)}
 .person-card.rose{background:linear-gradient(145deg,#dda1b5,#cf88a1)}
 .person-card.olive{background:linear-gradient(145deg,#bcc57d,#a6b263)}
-.person-card.lilac{background:linear-gradient(145deg,#c8bdc9,#b3a7b6)}
+.person-card.lilac{background:linear-gradient(145deg,#b99add,#8d6bb8)}
 .person-card.cream{background:linear-gradient(145deg,#eee6d2,#ded0ad)}
 .person-card.blue{background:linear-gradient(145deg,#c9ddeb,#aecde2)}
 .sticker{position:absolute;right:18px;top:18px;font-size:26px;z-index:2}
