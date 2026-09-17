@@ -48,6 +48,12 @@ body:before{
   background:rgba(93,106,110,.3);backdrop-filter:blur(22px);
   border-radius:28px;box-shadow:0 8px 32px rgba(47,62,65,.14);
 }
+.site-nav{grid-template-columns:auto minmax(220px,1fr) auto;padding:12px 20px;gap:18px}
+.site-brand{display:flex;align-items:center;gap:10px;color:white;text-decoration:none;font-weight:600;white-space:nowrap;font-size:16px}
+.site-brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.22);font-size:16px}
+.site-search{height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border-radius:16px;background:rgba(238,241,238,.3);border:1px solid rgba(255,255,255,.2);color:white}
+.site-search input{width:100%;border:0;outline:0;background:transparent;color:white;font:inherit}.site-search input::placeholder{color:rgba(255,255,255,.72)}
+.nav-add{border:1px solid rgba(255,255,255,.36);border-radius:999px;padding:10px 15px;background:rgba(255,255,255,.22);color:white;font-weight:600;white-space:nowrap}.nav-add:hover{background:rgba(255,255,255,.36)}
 .browser-left{display:flex;gap:8px}
 .chrome-btn,.plus,.close{border:0;background:rgba(255,255,255,.35);color:white}
 .chrome-btn{width:34px;height:34px;border-radius:50%;font-size:26px;line-height:30px}
@@ -59,7 +65,7 @@ body:before{
 .address-text{flex:1;font-size:18px}
 .home,.refresh{font-size:20px;opacity:.92}
 .plus{width:38px;height:38px;border-radius:50%;font-size:28px;background:transparent}
-.hero{padding:92px 12px 72px;text-align:center}
+.hero{padding:44px 12px 46px;text-align:center}
 .eyebrow,.tiny{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:600}
 .eyebrow{opacity:.7;margin-bottom:18px}
 h1{
@@ -206,8 +212,9 @@ fieldset{border:0;padding:0}
 @media(max-width:620px){
   .shell{width:min(100% - 16px,1180px);margin-top:10px}
   .browser{top:8px;border-radius:23px;padding:9px}
+  .site-nav{grid-template-columns:1fr auto;padding:10px 14px}.site-search{grid-column:1/-1;grid-row:2;height:40px}.site-brand{font-size:14px}
   .browser-left{display:none}.address{height:42px}.address-text{font-size:15px}
-  .hero{padding:72px 8px 52px}
+  .hero{padding:38px 8px 42px}
   h1{font-size:64px}
   .toolbar{align-items:stretch;flex-direction:column}
   #search{width:100%}

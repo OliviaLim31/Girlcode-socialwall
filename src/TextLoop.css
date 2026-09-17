@@ -1,0 +1,6 @@
+.text-loop{position:relative;width:100vw;height:180px;margin:12px calc(50% - 50vw) -4px;overflow:hidden;color:var(--loop-color)}
+.text-loop__svg{display:block;width:100%;height:100%;overflow:visible}
+.text-loop__ribbon{fill:none;stroke:var(--ribbon-color);stroke-width:var(--ribbon-width);stroke-linecap:butt;filter:drop-shadow(0 12px 12px rgba(74,14,98,.22))}
+.text-loop__text{fill:var(--loop-color);font-family:"DM Sans",sans-serif;font-size:var(--loop-size);font-weight:var(--loop-weight);letter-spacing:var(--loop-spacing);dominant-baseline:middle;paint-order:stroke;stroke:rgba(74,14,98,.12);stroke-width:1px}
+.text-loop__text--uppercase{text-transform:uppercase}
+@media (max-width:760px){.text-loop{height:132px;margin-top:12px}.text-loop__text{font-size:30px}.text-loop__ribbon{stroke-width:52px}}
