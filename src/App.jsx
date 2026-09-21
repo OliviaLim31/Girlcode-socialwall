@@ -100,6 +100,15 @@ function safeLinkedIn(value = "") {
     return "";
   }
 }
+function parseSong(value = "") {
+  const raw = String(value).trim();
+  if (!raw) return null;
+  const [title, artist = ""] = raw.split(/\s*(?:—|–|-|\||,|\bby\b)\s*/i, 2);
+  return { title: title.trim(), artist: artist.trim(), raw };
+}
+function spotifySearchUrl(song) {
+  return `https://open.spotify.com/search/${encodeURIComponent(song.raw || `${song.title} ${song.artist}`)}`;
+}
 function compressImage(file, maxSize = 720, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -197,6 +206,10 @@ function App() {
       ),
     [people, query],
   );
+  const musicRecommendations = useMemo(
+    () => people.filter((person) => person.song?.title),
+    [people],
+  );
   const openProfile = (person) => {
     setActivePerson(person);
     setMessageError("");
@@ -219,6 +232,7 @@ function App() {
     if (!form.reportValidity()) return;
     const data = new FormData(form),
       file = data.get("photo"),
+      song = parseSong(data.get("song")),
       person = {
         id: crypto.randomUUID(),
         name: data.get("name").trim(),
@@ -226,6 +240,7 @@ function App() {
         linkedin: cleanLinkedIn(data.get("linkedin")),
         about: data.get("about").trim(),
         tone: data.get("tone") || "rose",
+        song,
         photo: "",
       };
     if (!person.name || !/^[a-zA-Z0-9._]{1,30}$/.test(person.ig))
@@ -345,33 +360,33 @@ function App() {
         </header>
         <section className="hero">
           <div className="hero-intro">
-          <figure className="hero-polaroid hero-polaroid-left">
-            <button type="button" className="polaroid-open" aria-label="Enlarge group photo" aria-haspopup="dialog" onClick={openPhoto}>
-            <img src="/images/polaroid-together.jpg" alt="Group photo at the girls' vibe coding session" width="2560" height="1919" />
-              <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
-            </button>
-            <figcaption>better together ♡</figcaption>
-          </figure>
-          <div className="hero-copy">
-          <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
-          <h1>
-            we met <em>irl.</em>
-            <br />
-            stay{" "}
-            <span className="highlight-wrap">
-              <span className="highlight">connected</span>
-            </span>{" "}
-            <em>online.</em>
-          </h1>
-          <p className="sub">a tiny people wall for the girls in the room ♡</p>
-          </div>
-          <figure className="hero-polaroid hero-polaroid-right">
-            <button type="button" className="polaroid-open" aria-label="Enlarge event photo" aria-haspopup="dialog" onClick={openPhoto}>
-            <img src="/images/polaroid-create.jpg" alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule" width="1920" height="2560" />
-              <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
-            </button>
-            <figcaption>little ideas, big energy ✦</figcaption>
-          </figure>
+            <figure className="hero-polaroid hero-polaroid-left">
+              <button type="button" className="polaroid-open" aria-label="Enlarge group photo" aria-haspopup="dialog" onClick={openPhoto}>
+                <img src="/images/polaroid-together.jpg" alt="Group photo at the girls' vibe coding session" width="2560" height="1919" />
+                <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
+              </button>
+              <figcaption>better together ♡</figcaption>
+            </figure>
+            <div className="hero-copy">
+              <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
+              <h1>
+                we met <em>irl.</em>
+                <br />
+                stay{" "}
+                <span className="highlight-wrap">
+                  <span className="highlight">connected</span>
+                </span>{" "}
+                <em>online.</em>
+              </h1>
+              <p className="sub">a tiny people wall for the girls in the room ♡</p>
+            </div>
+            <figure className="hero-polaroid hero-polaroid-right">
+              <button type="button" className="polaroid-open" aria-label="Enlarge event photo" aria-haspopup="dialog" onClick={openPhoto}>
+                <img src="/images/polaroid-create.jpg" alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule" width="1920" height="2560" />
+                <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
+              </button>
+              <figcaption>little ideas, big energy ✦</figcaption>
+            </figure>
           </div>
           <TextLoop
             text="Create ✦ Learn ✦ Build ✦ Support"
@@ -438,6 +453,12 @@ function App() {
                 <p className="about">
                   {person.about || "say hi if you see me around ♡"}
                 </p>
+                {person.song && (
+                  <a className="song-chip" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer">
+                    <span aria-hidden="true">♫</span>
+                    <span><strong>{person.song.title}</strong>{person.song.artist && <small>{person.song.artist}</small>}</span>
+                  </a>
+                )}
                 <div className="links">
                   <span className="social-summary">
                     {safeLinkedIn(person.linkedin)
@@ -454,6 +475,23 @@ function App() {
               </div>
             </article>
           ))}
+        </section>
+        <section className="music-gallery" aria-labelledby="musicGalleryTitle">
+          <div className="music-gallery-head">
+            <div><div className="tiny">our soundtrack</div><h2 id="musicGalleryTitle">on repeat ♫</h2></div>
+            <p>little songs, recommended by the room</p>
+          </div>
+          {musicRecommendations.length ? (
+            <div className="music-grid">
+              {musicRecommendations.map((person) => (
+                <a className="music-card" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer" key={`${person.id}-song`}>
+                  <span className="vinyl" aria-hidden="true"><i /></span>
+                  <span className="music-copy"><strong>{person.song.title}</strong>{person.song.artist && <span>{person.song.artist}</span>}<small>recommended by {person.name}</small></span>
+                  <span className="listen-label">listen on Spotify ↗</span>
+                </a>
+              ))}
+            </div>
+          ) : <p className="music-empty">The first song recommendation will appear here ♫</p>}
         </section>
         <footer>
           <span>
@@ -511,6 +549,16 @@ function App() {
               name="about"
               maxLength="90"
               placeholder="creative tech, skating, random side quests"
+            />
+          </label>
+          <label>
+            <span>
+              What song do you recommend? <i>optional</i>
+            </span>
+            <input
+              name="song"
+              maxLength="200"
+              placeholder="e.g. Espresso — Sabrina Carpenter"
             />
           </label>
           <label>
