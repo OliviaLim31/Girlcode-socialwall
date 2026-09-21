@@ -66,6 +66,29 @@ body:before{
 .home,.refresh{font-size:20px;opacity:.92}
 .plus{width:38px;height:38px;border-radius:50%;font-size:28px;background:transparent}
 .hero{padding:44px 12px 46px;text-align:center}
+.hero-intro{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr) minmax(0,160px);align-items:center;gap:30px;padding:12px 8px 20px}
+.hero-copy{min-width:0}
+.hero-copy h1{font-size:clamp(58px,6.6vw,80px)}
+.hero-polaroid{position:relative;margin:0;padding:10px 10px 0;background:#fffdf6;box-shadow:0 14px 24px rgba(47,49,38,.18),0 2px 4px rgba(47,49,38,.1);transform:rotate(var(--tilt));transition:transform .25s ease}
+.hero-polaroid-left{--tilt:-9deg;margin-top:16px}
+.hero-polaroid-right{--tilt:8deg;margin-top:46px}
+.hero-polaroid::before{content:"";position:absolute;z-index:1;width:66px;height:23px;top:-12px;left:50%;transform:translateX(-50%) rotate(-5deg);background:rgba(228,211,232,.8);border-left:1px dashed rgba(255,255,255,.7);border-right:1px dashed rgba(255,255,255,.7)}
+.hero-polaroid-right::before{background:rgba(230,223,180,.85);transform:translateX(-50%) rotate(6deg)}
+.hero-polaroid img{display:block;width:100%;height:auto}
+.hero-polaroid figcaption{display:grid;place-items:center;min-height:45px;padding:8px 0;font:italic 17px/1.15 "Instrument Serif",serif;color:#595248}
+@media(hover:hover){.hero-polaroid:hover{transform:translateY(-5px) rotate(0deg)}}
+@media(max-width:1000px){
+  .hero-intro{grid-template-columns:minmax(0,180px) minmax(0,1fr) minmax(0,120px);gap:24px}
+  .hero-copy h1{font-size:clamp(48px,6.4vw,64px)}
+  .hero-polaroid figcaption{font-size:15px}
+}
+@media(max-width:760px){
+  .hero-intro{grid-template-columns:minmax(0,200px) minmax(0,145px);justify-content:center;gap:32px 26px;padding:0 12px 14px}
+  .hero-copy{grid-column:1/-1;grid-row:1;width:calc(100vw - 60px);justify-self:center}
+  .hero-copy h1{font-size:clamp(46px,9vw,68px)}
+  .hero-polaroid-left,.hero-polaroid-right{margin-top:0}
+  .hero-copy .sub{font-size:15px;line-height:1.5}
+}
 .eyebrow,.tiny{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:600}
 .eyebrow{opacity:.7;margin-bottom:18px}
 h1{
@@ -232,4 +255,46 @@ fieldset{border:0;padding:0}
   html{scroll-behavior:auto}
   *,*::before,*::after{transition:none !important}
   .person-card:hover{transform:none}
+}
+
+/* Shared motion: gentle entrances, quick interaction feedback. */
+@keyframes enter-soft{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
+@keyframes backdrop-in{from{background:rgba(31,34,29,0);backdrop-filter:blur(0)}to{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}}
+@keyframes backdrop-out{to{background:rgba(31,34,29,0);backdrop-filter:blur(0)}}
+.site-nav,.hero-copy,.hero-polaroid,.hero .text-loop,.hero-actions,.toolbar,.person-card,footer{animation:enter-soft .65s cubic-bezier(.2,.8,.2,1) backwards}
+.hero-copy{animation-delay:80ms}
+.hero-polaroid-left{animation-delay:160ms}
+.hero-polaroid-right{animation-delay:240ms}
+.hero .text-loop{animation-delay:280ms}
+.hero-actions{animation-delay:340ms}
+.toolbar,footer{animation-delay:380ms}
+.person-card{animation-delay:var(--enter-delay,0ms)}
+button,a,.swatch,.site-search,.sheet input,.sheet textarea{transition:translate .2s ease,scale .2s ease,background-color .2s ease,box-shadow .2s ease,opacity .2s ease,border-color .2s ease}
+@media(hover:hover){
+  button:not(:disabled):not(.polaroid-open):not(.card-open):hover,a:hover{translate:0 -2px}
+  .swatch:hover{scale:1.12}
+}
+/* The stretched card button must not become a containing block on press. */
+button:not(:disabled):not(.card-open):active,a:active{scale:.97}
+.person-card:active{scale:.99}
+.person-card:focus-within{box-shadow:0 22px 60px rgba(39,46,38,.2)}
+.site-search:focus-within{background:rgba(255,255,255,.4);box-shadow:0 0 0 3px rgba(207,169,218,.5)}
+.sheet input:focus,.sheet textarea:focus{border-color:var(--lilac);box-shadow:0 0 0 3px rgba(157,127,194,.14)}
+body:has(dialog[open]){overflow:hidden}
+dialog[open]::backdrop{animation:backdrop-in .34s ease both}
+dialog[data-closing]::backdrop{animation:backdrop-out .18s ease both}
+.polaroid-open{display:block;position:relative;width:100%;padding:0;border:0;background:transparent;cursor:zoom-in}
+.photo-zoom-hint{position:absolute;bottom:8px;left:50%;translate:-50% 0;white-space:nowrap;padding:5px 9px;border-radius:999px;background:rgba(35,35,31,.75);color:white;font-size:10px;opacity:0;transition:opacity .2s ease}
+.polaroid-open:hover .photo-zoom-hint,.polaroid-open:focus-visible .photo-zoom-hint{opacity:1}
+.photo-dialog{width:fit-content;max-width:calc(100vw - 32px);max-height:92dvh;overflow:auto}
+.photo-lightbox{position:relative;padding:14px 14px 0;background:#fffdf6;border-radius:6px;box-shadow:var(--shadow)}
+.photo-lightbox figure{margin:0}
+.photo-lightbox img{display:block;width:auto;height:auto;max-width:min(100%,1000px);max-height:calc(92dvh - 85px);object-fit:contain;margin:auto}
+.photo-lightbox figcaption{text-align:center;padding:16px 40px;font:italic 23px/1.2 "Instrument Serif",serif;color:#595248}
+.photo-close{position:absolute;right:22px;top:22px;z-index:1;background:rgba(255,253,246,.95);box-shadow:0 2px 10px #0002}
+@media(hover:none){.photo-zoom-hint{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+  button,a,.swatch{translate:none !important;scale:none !important}
+  .hero-polaroid:hover{transform:rotate(var(--tilt))}
 }

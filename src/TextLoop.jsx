@@ -59,13 +59,18 @@ export default function TextLoop({
         repeat: -1,
       },
     );
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => preference.matches ? tween.pause() : tween.resume();
+    syncMotion();
+    preference.addEventListener("change", syncMotion);
     const onEnter = () => pauseOnHover && tween.pause();
-    const onLeave = () => pauseOnHover && tween.resume();
+    const onLeave = () => pauseOnHover && !preference.matches && tween.resume();
     root.current.addEventListener("mouseenter", onEnter);
     root.current.addEventListener("mouseleave", onLeave);
     return () => {
       root.current?.removeEventListener("mouseenter", onEnter);
       root.current?.removeEventListener("mouseleave", onLeave);
+      preference.removeEventListener("change", syncMotion);
       tween.kill();
     };
   }, [animationDuration, direction, pauseOnHover, repeatedText]);
