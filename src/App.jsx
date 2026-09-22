@@ -101,6 +101,15 @@ function safeLinkedIn(value = "") {
     return "";
   }
 }
+function parseSong(value = "") {
+  const raw = String(value).trim();
+  if (!raw) return null;
+  const [title, artist = ""] = raw.split(/\s*(?:—|–|-|\||,|\bby\b)\s*/i, 2);
+  return { title: title.trim(), artist: artist.trim(), raw };
+}
+function spotifySearchUrl(song) {
+  return `https://open.spotify.com/search/${encodeURIComponent(song.raw || `${song.title} ${song.artist}`)}`;
+}
 function compressImage(file, maxSize = 720, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -198,6 +207,10 @@ function App() {
       ),
     [people, query],
   );
+  const musicRecommendations = useMemo(
+    () => people.filter((person) => person.song?.title),
+    [people],
+  );
   const openProfile = (person) => {
     setActivePerson(person);
     setMessageError("");
@@ -220,6 +233,7 @@ function App() {
     if (!form.reportValidity()) return;
     const data = new FormData(form),
       file = data.get("photo"),
+      song = parseSong(data.get("song")),
       person = {
         id: crypto.randomUUID(),
         name: data.get("name").trim(),
@@ -227,6 +241,7 @@ function App() {
         linkedin: cleanLinkedIn(data.get("linkedin")),
         about: data.get("about").trim(),
         tone: data.get("tone") || "rose",
+        song,
         photo: "",
       };
     if (!person.name || !/^[a-zA-Z0-9._]{1,30}$/.test(person.ig))
@@ -439,6 +454,12 @@ function App() {
                 <p className="about">
                   {person.about || "say hi if you see me around ♡"}
                 </p>
+                {person.song && (
+                  <a className="song-chip" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer">
+                    <span aria-hidden="true">♫</span>
+                    <span><strong>{person.song.title}</strong>{person.song.artist && <small>{person.song.artist}</small>}</span>
+                  </a>
+                )}
                 <div className="links">
                   <span className="social-summary">
                     {safeLinkedIn(person.linkedin)
@@ -455,6 +476,23 @@ function App() {
               </div>
             </article>
           ))}
+        </section>
+        <section className="music-gallery" aria-labelledby="musicGalleryTitle">
+          <div className="music-gallery-head">
+            <div><div className="tiny">our soundtrack</div><h2 id="musicGalleryTitle">on repeat ♫</h2></div>
+            <p>little songs, recommended by the room</p>
+          </div>
+          {musicRecommendations.length ? (
+            <div className="music-grid">
+              {musicRecommendations.map((person) => (
+                <a className="music-card" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer" key={`${person.id}-song`}>
+                  <span className="vinyl" aria-hidden="true"><i /></span>
+                  <span className="music-copy"><strong>{person.song.title}</strong>{person.song.artist && <span>{person.song.artist}</span>}<small>recommended by {person.name}</small></span>
+                  <span className="listen-label">listen on Spotify ↗</span>
+                </a>
+              ))}
+            </div>
+          ) : <p className="music-empty">The first song recommendation will appear here ♫</p>}
         </section>
         <footer>
           <span>
