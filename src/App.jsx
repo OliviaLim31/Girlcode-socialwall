@@ -192,7 +192,23 @@ function App() {
     [query, setQuery] = useState(""),
     [toast, setToast] = useState(""),
     [messages, setMessages] = useState([]),
-    [messageError, setMessageError] = useState("");
+    [messageError, setMessageError] = useState(""),
+    [formError, setFormError] = useState(""),
+    [formErrorKey, setFormErrorKey] = useState(0);
+  const showFormError = (message) => {
+    window.clearTimeout(showFormError.timer);
+    setFormError(message);
+    setFormErrorKey((key) => key + 1);
+    showFormError.timer = window.setTimeout(() => setFormError(""), 5000);
+  };
+  const dismissFormError = () => {
+    window.clearTimeout(showFormError.timer);
+    setFormError("");
+  };
+  const openAddForm = () => {
+    dismissFormError();
+    formDialog.current.showModal();
+  };
   const notify = (message) => {
     setToast(message);
     window.clearTimeout(notify.timer);
@@ -230,7 +246,7 @@ function App() {
   const addProfile = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    if (!form.reportValidity()) return;
+    dismissFormError();
     const data = new FormData(form),
       file = data.get("photo"),
       song = parseSong(data.get("song")),
@@ -244,10 +260,11 @@ function App() {
         song,
         photo: "",
       };
-    if (!person.name || !/^[a-zA-Z0-9._]{1,30}$/.test(person.ig))
-      return notify("Please enter a name and a valid Instagram username.");
+    if (!person.name) return showFormError("Please add your name before saving.");
+    if (!/^[a-zA-Z0-9._]{1,30}$/.test(person.ig))
+      return showFormError("Your Instagram username can use letters, numbers, dots, and underscores only.");
     if (person.linkedin && !safeLinkedIn(person.linkedin))
-      return notify("Please enter a valid HTTPS LinkedIn profile link.");
+      return showFormError("Please enter a valid LinkedIn profile link starting with https://.");
     try {
       if (file?.size) person.photo = await compressImage(file);
       if (backendEnabled) {
@@ -270,6 +287,7 @@ function App() {
       }
       setPeople((current) => [...current, person]);
       setQuery("");
+      dismissFormError();
       form.reset();
       formDialog.current.close();
       notify(`${person.name} is on the wall ✦`);
@@ -282,7 +300,7 @@ function App() {
         80,
       );
     } catch (error) {
-      notify(error.message || "Couldn't add the profile — try again");
+      showFormError(error.message || "We couldn't save your profile. Please try again.");
     }
   };
   const addMessage = (event) => {
@@ -354,7 +372,7 @@ function App() {
           </label>
           <button
             className="nav-add"
-            onClick={() => formDialog.current.showModal()}
+            onClick={openAddForm}
           >
             + add me
           </button>
@@ -408,7 +426,7 @@ function App() {
           <div className="hero-actions">
             <button
               className="primary"
-              onClick={() => formDialog.current.showModal()}
+              onClick={openAddForm}
             >
               + add me
             </button>
@@ -498,7 +516,7 @@ function App() {
           <span>
             made for one room, one afternoon, and a lot of new mutuals ✦
           </span>
-          <button onClick={() => formDialog.current.showModal()}>
+          <button onClick={openAddForm}>
             add yourself ↗
           </button>
         </footer>
@@ -507,7 +525,14 @@ function App() {
         ref={formDialog}
         aria-labelledby="formTitle"
       >
-        <form ref={addForm} className="sheet" onSubmit={addProfile}>
+        <form ref={addForm} className="sheet" onSubmit={addProfile} noValidate>
+          {formError && (
+            <div className="form-alert" role="alert" key={formErrorKey}>
+              <span className="form-alert-star" aria-hidden="true">✦</span>
+              <span>{formError}</span>
+              <button type="button" onClick={dismissFormError} aria-label="Dismiss alert">×</button>
+            </div>
+          )}
           <div className="sheet-head">
             <div>
               <div className="tiny">join the wall</div>

@@ -179,9 +179,13 @@ dialog{border:0;padding:0;background:transparent;width:min(560px,calc(100% - 24p
 dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .sheet{
   background:rgba(246,243,236,.94);backdrop-filter:blur(18px);
-  border-radius:32px;padding:26px;border:1px solid rgba(255,255,255,.7);
+  position:relative;border-radius:32px;padding:26px;border:1px solid rgba(255,255,255,.7);
   box-shadow:0 30px 100px rgba(27,31,26,.25);overflow:auto
 }
+.form-alert{position:fixed;top:50%;left:50%;z-index:100;display:flex;align-items:center;gap:9px;width:max-content;max-width:calc(100vw - 36px);padding:9px 12px 9px 8px;border:2px solid #f28ab4;border-radius:999px;background:linear-gradient(180deg,#ffeaf3,#f8bdd2);box-shadow:0 12px 32px rgba(151,45,91,.28),inset 0 1px 0 rgba(255,255,255,.9);color:#a32961;font-size:12px;font-weight:700;line-height:1.25;transform:translate(-50%,-50%);animation:form-alert-pop .38s cubic-bezier(.2,1.45,.45,1) both}
+.form-alert-star{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border-radius:50%;background:#fff3f8;color:#f15c99;font-size:21px;box-shadow:0 2px 6px rgba(180,52,109,.16)}
+.form-alert>span:nth-child(2){overflow-wrap:anywhere}.form-alert button{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(255,255,255,.5);color:#b52b68;font-size:17px;line-height:1}
+@keyframes form-alert-pop{0%{opacity:0;transform:translate(-50%,-62%) scale(.72)}65%{opacity:1;transform:translate(-50%,-48%) scale(1.05)}100%{transform:translate(-50%,-50%) scale(1)}}
 .sheet-head{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px}
 .sheet h2{font:400 42px/1 "Instrument Serif",serif;margin:5px 0 0}
 .close{color:var(--ink);background:#e6e0d4;width:38px;height:38px;border-radius:50%;font-size:26px}
@@ -256,6 +260,7 @@ fieldset{border:0;padding:0}
   .person-card .handle{font-size:11px}
   .person-card .card-open{font-size:11px;line-height:1.5}
   .sheet{padding:20px}
+  .form-alert{font-size:11px}
   footer{flex-direction:column}
 }
 @media(prefers-reduced-motion:reduce){
