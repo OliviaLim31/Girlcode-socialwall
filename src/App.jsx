@@ -14,18 +14,21 @@ const seed = [
   {
     name: "Edwina",
     ig: "edeuwinaa",
+    linkedin: "https://my.linkedin.com/in/edwina-hon-548189340",
     about: "design, people, and pretty little details",
     tone: "olive",
   },
   {
     name: "Zhi Wei",
     ig: "zwwavo",
+    linkedin: "https://my.linkedin.com/in/tanzhiwei0328",
     about: "building weird ideas that somehow work",
     tone: "lilac",
   },
   {
     name: "Hana",
     ig: "yh_06s",
+    linkedin: "https://my.linkedin.com/in/hana2006",
     about: "soft visuals, fun concepts, good playlists",
     tone: "cream",
   },
