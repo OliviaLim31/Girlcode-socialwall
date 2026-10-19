@@ -50,13 +50,24 @@ body:before{
 .site-nav{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
-.site-brand{display:flex;align-items:center;gap:10px;color:white;text-decoration:none;font-weight:600;white-space:nowrap;font-size:16px}
+.site-brand{display:flex;align-items:center;gap:11px;color:white;text-decoration:none;white-space:nowrap}
 .site-brand-logo{
-  width:32px;height:32px;border-radius:50%;object-fit:cover;
-  border:1.5px solid rgba(255,255,255,.75);box-shadow:0 2px 10px rgba(0,0,0,.15);
+  width:36px;height:36px;border-radius:50%;object-fit:cover;
+  border:1.5px solid rgba(255,255,255,.8);box-shadow:0 2px 10px rgba(0,0,0,.15);
   background:#fff;transition:transform .25s ease;flex-shrink:0;
 }
 .site-brand:hover .site-brand-logo{transform:rotate(-6deg) scale(1.1)}
+.site-brand-text{
+  font: italic 400 27px/1 "Instrument Serif", serif;
+  letter-spacing: .02em;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.18);
+  transition: all .2s ease;
+}
+.site-brand:hover .site-brand-text{
+  color: #ffe8f3;
+  text-shadow: 0 0 16px rgba(247,201,215,.65);
+}
 
 /* Nav Tabs */
 .nav-tabs{

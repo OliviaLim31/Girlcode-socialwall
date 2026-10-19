@@ -524,8 +524,8 @@ function App() {
               scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            <img src="/logo.png" alt="Girl Code logo" className="site-brand-logo" />
-            <span>girlcode social wall</span>
+            <img src="/logo.png" alt="GirlCode logo" className="site-brand-logo" />
+            <span className="site-brand-text">GirlCode</span>
           </a>
 
           {/* Tab Switcher */}
