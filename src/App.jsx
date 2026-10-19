@@ -1,7 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import TextLoop from "./TextLoop";
 import AnimatedDialog from "./AnimatedDialog";
+import EventGallery, { defaultMemories } from "./EventGallery";
+import AddMemoryModal from "./AddMemoryModal";
+import Lightbox from "./Lightbox";
 
 const seed = [
   {
@@ -9,7 +12,8 @@ const seed = [
     ig: "olivia.lim31",
     about: "creative tech · skating · random side quests",
     tone: "rose",
-    linkedin: "https://www.linkedin.com/in/olivialimyunxuan/"
+    linkedin: "https://www.linkedin.com/in/olivialimyunxuan/",
+    photo: "/images/GC%20Group.jpg",
   },
   {
     name: "Edwina",
@@ -45,14 +49,17 @@ const seed = [
     tone: "olive",
   },
 ];
+
 const seedProfiles = seed.map((profile, index) => ({
   ...profile,
   id: `seed-${index}`,
 }));
+
 const initialProfiles = [
   seedProfiles[2],
   ...seedProfiles.filter((profile) => profile.id !== "seed-2"),
 ];
+
 const tones = ["rose", "olive", "lilac", "cream", "blue"];
 const frontendConfig = window.GIRLCODE_SUPABASE || {};
 const supabaseUrl = String(frontendConfig.url || "").replace(/\/$/, "");
@@ -63,10 +70,14 @@ const authClient = backendEnabled
   : null;
 
 function readStoredArray(key) {
-  const value = JSON.parse(localStorage.getItem(key) || "[]");
-  if (!Array.isArray(value)) throw new Error("Invalid stored data");
-  return value;
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
 }
+
 function initials(name = "") {
   return name
     .split(/\s+/)
@@ -75,6 +86,7 @@ function initials(name = "") {
     .join("")
     .toUpperCase();
 }
+
 function cleanIg(value = "") {
   return value
     .trim()
@@ -82,6 +94,7 @@ function cleanIg(value = "") {
     .replace(/^https?:\/\/(www\.)?instagram\.com\//, "")
     .replace(/\/.*$/, "");
 }
+
 function cleanLinkedIn(value = "") {
   return (
     value.trim() &&
@@ -90,6 +103,7 @@ function cleanLinkedIn(value = "") {
       : value.trim())
   );
 }
+
 function safeLinkedIn(value = "") {
   try {
     const url = new URL(cleanLinkedIn(value));
@@ -104,15 +118,18 @@ function safeLinkedIn(value = "") {
     return "";
   }
 }
+
 function parseSong(value = "") {
   const raw = String(value).trim();
   if (!raw) return null;
   const [title, artist = ""] = raw.split(/\s*(?:—|–|-|\||,|\bby\b)\s*/i, 2);
   return { title: title.trim(), artist: artist.trim(), raw };
 }
+
 function spotifySearchUrl(song) {
   return `https://open.spotify.com/search/${encodeURIComponent(song.raw || `${song.title} ${song.artist}`)}`;
 }
+
 function compressImage(file, maxSize = 720, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -138,6 +155,7 @@ function compressImage(file, maxSize = 720, quality = 0.82) {
     reader.readAsDataURL(file);
   });
 }
+
 async function createProfileOnBackend(person) {
   const {
     data: { session },
@@ -167,16 +185,46 @@ async function createProfileOnBackend(person) {
   return result.data;
 }
 
+const heroPolaroids = [
+  {
+    id: "hero-1",
+    src: "/images/polaroid-together.jpg",
+    alt: "Group photo at the girls' vibe coding session",
+    title: "Better Together ♡",
+    caption: "Group photo at the girls' vibe coding session in KL.",
+    tag: "Group Love",
+    date: "12.09.26",
+    author: "Girls in KL",
+  },
+  {
+    id: "hero-2",
+    src: "/images/polaroid-create.jpg",
+    alt: "Laptop displaying the Girls Only Vibe Code Session poster and event schedule",
+    title: "Little Ideas, Big Energy ✦",
+    caption: "Laptop displaying the Girls Only Vibe Code Session poster and event schedule.",
+    tag: "Coding & Vibe",
+    date: "12.09.26",
+    author: "KL Meetup",
+  },
+];
+
 function App() {
-  const formDialog = useRef(null),
-    detailDialog = useRef(null),
-    photoDialog = useRef(null),
-    addForm = useRef(null);
+  const formDialog = useRef(null);
+  const detailDialog = useRef(null);
+  const photoDialog = useRef(null);
+  const memoryDialog = useRef(null);
+  const addForm = useRef(null);
+
+  // Tab State: 'wall' | 'gallery'
+  const [activeTab, setActiveTab] = useState("wall");
+
+  // People State
   const [people, setPeople] = useState(() => {
     try {
+      const stored = readStoredArray("girlcode-socialwall-people");
       return [
         ...initialProfiles,
-        ...readStoredArray("girlcode-socialwall-people")
+        ...stored
           .filter((p) => p?.name && p?.ig)
           .map((p, i) => ({ ...p, id: p.id || `legacy-${i}` })),
       ];
@@ -184,68 +232,171 @@ function App() {
       return initialProfiles;
     }
   });
-  const [activePhoto, setActivePhoto] = useState(null);
-  const openPhoto = (event) => {
-    const figure = event.currentTarget.closest("figure");
-    const image = figure.querySelector("img");
-    setActivePhoto({ src: image.getAttribute("src"), alt: image.alt, caption: figure.querySelector("figcaption").textContent });
-    photoDialog.current.showModal();
-  };
-  const [activePerson, setActivePerson] = useState(null),
-    [query, setQuery] = useState(""),
-    [toast, setToast] = useState(""),
-    [messages, setMessages] = useState([]),
-    [messageError, setMessageError] = useState(""),
-    [formError, setFormError] = useState(""),
-    [formErrorKey, setFormErrorKey] = useState(0);
+
+  // Memories State
+  const [memories, setMemories] = useState(() => {
+    try {
+      const stored = readStoredArray("girlcode-socialwall-memories");
+      return [...defaultMemories, ...stored];
+    } catch {
+      return defaultMemories;
+    }
+  });
+
+  // Reaction states
+  const [personReactions, setPersonReactions] = useState(() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("girlcode-socialwall-reactions") || "{}",
+      );
+    } catch {
+      return {};
+    }
+  });
+
+  const [memoryLikes, setMemoryLikes] = useState(() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("girlcode-memory-reactions") || "{}",
+      );
+    } catch {
+      return {};
+    }
+  });
+
+  // Lightbox State
+  const [lightboxData, setLightboxData] = useState({
+    items: [],
+    currentIndex: 0,
+  });
+
+  const [activePerson, setActivePerson] = useState(null);
+  const [query, setQuery] = useState("");
+  const [selectedTone, setSelectedTone] = useState("all");
+  const [toast, setToast] = useState("");
+  const [messages, setMessages] = useState(() =>
+    readStoredArray("girlcode-socialwall-messages"),
+  );
+  const [messageError, setMessageError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [formErrorKey, setFormErrorKey] = useState(0);
+
   const showFormError = (message) => {
     window.clearTimeout(showFormError.timer);
     setFormError(message);
     setFormErrorKey((key) => key + 1);
     showFormError.timer = window.setTimeout(() => setFormError(""), 5000);
   };
+
   const dismissFormError = () => {
     window.clearTimeout(showFormError.timer);
     setFormError("");
   };
+
   const openAddForm = () => {
     dismissFormError();
     formDialog.current.showModal();
   };
+
+  const openAddMemory = () => {
+    memoryDialog.current.showModal();
+  };
+
   const notify = (message) => {
     setToast(message);
     window.clearTimeout(notify.timer);
-    notify.timer = window.setTimeout(() => setToast(""), 1500);
+    notify.timer = window.setTimeout(() => setToast(""), 1800);
   };
+
+  // Open Lightbox
+  const openLightbox = (items, index = 0) => {
+    setLightboxData({ items, currentIndex: index });
+    photoDialog.current.showModal();
+  };
+
+  const nextLightboxPhoto = () => {
+    setLightboxData((prev) => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.items.length,
+    }));
+  };
+
+  const prevLightboxPhoto = () => {
+    setLightboxData((prev) => ({
+      ...prev,
+      currentIndex:
+        (prev.currentIndex - 1 + prev.items.length) % prev.items.length,
+    }));
+  };
+
+  const closeLightbox = () => {
+    photoDialog.current.close();
+  };
+
+  // Handle Person Reaction (Sparkle)
+  const handlePersonReaction = (e, personId) => {
+    e.stopPropagation();
+    setPersonReactions((prev) => {
+      const next = { ...prev, [personId]: (prev[personId] || 0) + 1 };
+      localStorage.setItem(
+        "girlcode-socialwall-reactions",
+        JSON.stringify(next),
+      );
+      return next;
+    });
+    notify("sent a sparkle ✨");
+  };
+
+  // Handle Memory Like
+  const handleMemoryLike = (e, memId) => {
+    e.stopPropagation();
+    setMemoryLikes((prev) => {
+      const next = { ...prev, [memId]: (prev[memId] || 0) + 1 };
+      localStorage.setItem(
+        "girlcode-memory-reactions",
+        JSON.stringify(next),
+      );
+      return next;
+    });
+    notify("loved this memory ♡");
+  };
+
+  // Filtered people
   const shownPeople = useMemo(
     () =>
-      people.filter((p) =>
-        `${p.name} ${p.ig} ${p.about || ""}`
-          .toLowerCase()
-          .includes(query.toLowerCase().trim()),
-      ),
-    [people, query],
+      people.filter((p) => {
+        const matchesTone = selectedTone === "all" || p.tone === selectedTone;
+        const q = query.toLowerCase().trim();
+        const matchesQuery =
+          !q ||
+          `${p.name} ${p.ig} ${p.about || ""}`
+            .toLowerCase()
+            .includes(q);
+        return matchesTone && matchesQuery;
+      }),
+    [people, query, selectedTone],
   );
+
   const musicRecommendations = useMemo(
     () => people.filter((person) => person.song?.title),
     [people],
   );
+
   const openProfile = (person) => {
     setActivePerson(person);
     setMessageError("");
     try {
-      setMessages(
-        readStoredArray("girlcode-socialwall-messages").filter(
-          (m) => m?.personId === person.id,
-        ),
-      );
+      const allMsgs = readStoredArray("girlcode-socialwall-messages");
+      setMessages(allMsgs);
     } catch {
       setMessages([]);
       setMessageError("Couldn't load saved notes. Please try again later.");
     }
     detailDialog.current.showModal();
   };
+
   const closeDetail = () => detailDialog.current.close();
+
   const addProfile = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -265,9 +416,13 @@ function App() {
       };
     if (!person.name) return showFormError("Please add your name before saving.");
     if (!/^[a-zA-Z0-9._]{1,30}$/.test(person.ig))
-      return showFormError("Your Instagram username can use letters, numbers, dots, and underscores only.");
+      return showFormError(
+        "Your Instagram username can use letters, numbers, dots, and underscores only.",
+      );
     if (person.linkedin && !safeLinkedIn(person.linkedin))
-      return showFormError("Please enter a valid LinkedIn profile link starting with https://.");
+      return showFormError(
+        "Please enter a valid LinkedIn profile link starting with https://.",
+      );
     try {
       if (file?.size) person.photo = await compressImage(file);
       if (backendEnabled) {
@@ -294,18 +449,13 @@ function App() {
       form.reset();
       formDialog.current.close();
       notify(`${person.name} is on the wall ✦`);
-      setTimeout(
-        () =>
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          }),
-        80,
-      );
     } catch (error) {
-      showFormError(error.message || "We couldn't save your profile. Please try again.");
+      showFormError(
+        error.message || "We couldn't save your profile. Please try again.",
+      );
     }
   };
+
   const addMessage = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget),
@@ -337,6 +487,17 @@ function App() {
       );
     }
   };
+
+  const handleAddMemory = (newMemory) => {
+    const stored = readStoredArray("girlcode-socialwall-memories");
+    const updated = [newMemory, ...stored];
+    localStorage.setItem(
+      "girlcode-socialwall-memories",
+      JSON.stringify(updated),
+    );
+    setMemories((current) => [newMemory, ...current]);
+  };
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(location.href);
@@ -345,6 +506,10 @@ function App() {
       notify("couldn't auto-copy — copy it from the address bar");
     }
   };
+
+  const activeLightboxItem =
+    lightboxData.items[lightboxData.currentIndex] || null;
+
   return (
     <>
       <div className="ambient ambient-a" />
@@ -362,178 +527,387 @@ function App() {
             <span className="site-brand-mark">✦</span>
             <span>girlcode social wall</span>
           </a>
+
+          {/* Tab Switcher */}
+          <nav className="nav-tabs" aria-label="Page navigation">
+            <button
+              type="button"
+              className={`nav-tab-pill ${activeTab === "wall" ? "active" : ""}`}
+              onClick={() => {
+                setActiveTab("wall");
+                setQuery("");
+              }}
+            >
+              ✦ Social Wall
+            </button>
+            <button
+              type="button"
+              className={`nav-tab-pill ${activeTab === "gallery" ? "active" : ""}`}
+              onClick={() => {
+                setActiveTab("gallery");
+                setQuery("");
+              }}
+            >
+              📸 Event Gallery
+            </button>
+          </nav>
+
           <label className="site-search">
             <span aria-hidden="true">⌕</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               type="search"
-              placeholder="find someone..."
+              placeholder={
+                activeTab === "wall"
+                  ? "find someone or vibe..."
+                  : "search memories or tags..."
+              }
               autoComplete="off"
-              aria-label="Find someone"
+              aria-label="Search"
             />
           </label>
+
           <button
             className="nav-add"
-            onClick={openAddForm}
+            onClick={activeTab === "wall" ? openAddForm : openAddMemory}
           >
-            + add me
+            {activeTab === "wall" ? "+ add me" : "+ share memory"}
           </button>
         </header>
-        <section className="hero">
-          <div className="hero-intro">
-            <figure className="hero-polaroid hero-polaroid-left">
-              <button type="button" className="polaroid-open" aria-label="Enlarge group photo" aria-haspopup="dialog" onClick={openPhoto}>
-                <img src="/images/polaroid-together.jpg" alt="Group photo at the girls' vibe coding session" width="2560" height="1919" />
-                <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
-              </button>
-              <figcaption>better together ♡</figcaption>
-            </figure>
-            <div className="hero-copy">
-              <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
-              <h1>
-                we met <em>irl.</em>
-                <br />
-                stay{" "}
-                <span className="highlight-wrap">
-                  <span className="highlight">connected</span>
-                </span>{" "}
-                <em>online.</em>
-              </h1>
-              <p className="sub">a tiny people wall for the girls in the room ♡</p>
-            </div>
-            <figure className="hero-polaroid hero-polaroid-right">
-              <button type="button" className="polaroid-open" aria-label="Enlarge event photo" aria-haspopup="dialog" onClick={openPhoto}>
-                <img src="/images/polaroid-create.jpg" alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule" width="1920" height="2560" />
-                <span className="photo-zoom-hint" aria-hidden="true">view photo ↗</span>
-              </button>
-              <figcaption>little ideas, big energy ✦</figcaption>
-            </figure>
-          </div>
-          <TextLoop
-            text="Create ✦ Learn ✦ Build ✦ Support"
-            shape="wave"
-            speed={90}
-            direction="forward"
-            separator="✦"
-            curviness={62}
-            fontSize={50}
-            fontWeight={800}
-            letterSpacing={2}
-            uppercase
-            color="#ffffff"
-            ribbon
-            ribbonColor="#c15bb8ff"
-            ribbonWidth={66}
-          />
-          <div className="hero-actions">
-            <button
-              className="primary"
-              onClick={openAddForm}
-            >
-              + add me
-            </button>
-            <button className="ghost" onClick={copyLink}>
-              copy page link
-            </button>
-          </div>
-        </section>
-        <section className="toolbar">
-          <div>
-            <div className="tiny">who's here?</div>
-            <div className="count">
-              <span>{shownPeople.length}</span> girls on the wall
-            </div>
-          </div>
-        </section>
-        <section className="wall" aria-live="polite">
-          {shownPeople.map((person, index) => (
-            <article
-              className={`person-card ${tones.includes(person.tone) ? person.tone : "rose"}`}
-              key={person.id}
-              style={{ "--enter-delay": `${Math.min(index, 7) * 65}ms` }}
-            >
-              <div className="sticker star">✦</div>
-              <div className="portrait-wrap">
-                <div
-                  className="portrait"
-                  style={
-                    person.photo
-                      ? { backgroundImage: `url(${person.photo})` }
-                      : {}
-                  }
-                >
-                  {person.photo ? "" : initials(person.name)}
+
+        {activeTab === "wall" ? (
+          <div className="view-container view-fade-in">
+            <section className="hero">
+              <div className="hero-intro">
+                <figure className="hero-polaroid hero-polaroid-left">
+                  <button
+                    type="button"
+                    className="polaroid-open"
+                    aria-label="Enlarge group photo"
+                    aria-haspopup="dialog"
+                    onClick={() => openLightbox(heroPolaroids, 0)}
+                  >
+                    <img
+                      src="/images/polaroid-together.jpg"
+                      alt="Group photo at the girls' vibe coding session"
+                      width="2560"
+                      height="1919"
+                    />
+                    <span className="photo-zoom-hint" aria-hidden="true">
+                      view photo ↗
+                    </span>
+                  </button>
+                  <figcaption>better together ♡</figcaption>
+                </figure>
+                <div className="hero-copy">
+                  <div className="eyebrow">
+                    girls' vibe coding · kl · 12.09.26
+                  </div>
+                  <h1>
+                    we met <em>irl.</em>
+                    <br />
+                    stay{" "}
+                    <span className="highlight-wrap">
+                      <span className="highlight">connected</span>
+                    </span>{" "}
+                    <em>online.</em>
+                  </h1>
+                  <p className="sub">
+                    a tiny people wall for the girls in the room ♡
+                  </p>
                 </div>
+                <figure className="hero-polaroid hero-polaroid-right">
+                  <button
+                    type="button"
+                    className="polaroid-open"
+                    aria-label="Enlarge event photo"
+                    aria-haspopup="dialog"
+                    onClick={() => openLightbox(heroPolaroids, 1)}
+                  >
+                    <img
+                      src="/images/polaroid-create.jpg"
+                      alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule"
+                      width="1920"
+                      height="2560"
+                    />
+                    <span className="photo-zoom-hint" aria-hidden="true">
+                      view photo ↗
+                    </span>
+                  </button>
+                  <figcaption>little ideas, big energy ✦</figcaption>
+                </figure>
               </div>
-              <div className="person-copy">
-                <div className="name-row">
-                  <h3>{person.name}</h3>
-                  <span className="dot">●</span>
-                </div>
-                <span className="handle">@{person.ig}</span>
-                <p className="about">
-                  {person.about || "say hi if you see me around ♡"}
-                </p>
-                {person.song && (
-                  <a className="song-chip" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer">
-                    <span aria-hidden="true">♫</span>
-                    <span><strong>{person.song.title}</strong>{person.song.artist && <small>{person.song.artist}</small>}</span>
-                  </a>
-                )}
-                <div className="links">
-                  <span className="social-summary">
-                    {safeLinkedIn(person.linkedin)
-                      ? "instagram · linkedin"
-                      : "instagram"}
-                  </span>
-                </div>
+              <TextLoop
+                text="Create ✦ Learn ✦ Build ✦ Support"
+                shape="wave"
+                speed={90}
+                direction="forward"
+                separator="✦"
+                curviness={62}
+                fontSize={50}
+                fontWeight={800}
+                letterSpacing={2}
+                uppercase
+                color="#ffffff"
+                ribbon
+                ribbonColor="#c15bb8ff"
+                ribbonWidth={66}
+              />
+              <div className="hero-actions">
+                <button className="primary" onClick={openAddForm}>
+                  + add me
+                </button>
                 <button
-                  className="card-open"
-                  onClick={() => openProfile(person)}
+                  className="ghost"
+                  onClick={() => {
+                    setActiveTab("gallery");
+                    scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                 >
-                  view profile & leave a note ↗
+                  view event gallery 📸
+                </button>
+                <button className="ghost" onClick={copyLink}>
+                  copy page link
                 </button>
               </div>
-            </article>
-          ))}
-        </section>
-        <section className="music-gallery" aria-labelledby="musicGalleryTitle">
-          <div className="music-gallery-head">
-            <div><div className="tiny">our soundtrack</div><h2 id="musicGalleryTitle">on repeat ♫</h2></div>
-            <p>little songs, recommended by the room</p>
+            </section>
+
+            <section className="toolbar">
+              <div>
+                <div className="tiny">who's here?</div>
+                <div className="count">
+                  <span>{shownPeople.length}</span> girls on the wall
+                </div>
+              </div>
+
+              {/* Tone filters */}
+              <div className="tone-filters" role="group" aria-label="Filter by vibe color">
+                <button
+                  type="button"
+                  className={`tone-chip ${selectedTone === "all" ? "active" : ""}`}
+                  onClick={() => setSelectedTone("all")}
+                >
+                  ✦ all vibes
+                </button>
+                {tones.map((tone) => (
+                  <button
+                    key={tone}
+                    type="button"
+                    className={`tone-chip tone-chip-${tone} ${selectedTone === tone ? "active" : ""}`}
+                    onClick={() => setSelectedTone(tone)}
+                  >
+                    <span className={`swatch-dot ${tone}`} />
+                    {tone}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {shownPeople.length === 0 ? (
+              <div className="empty-state">
+                <span className="empty-icon">🌸</span>
+                <h3>no profiles found</h3>
+                <p>
+                  No cards matched your current search or vibe filter.
+                </p>
+                <div className="empty-actions">
+                  <button
+                    type="button"
+                    className="ghost"
+                    onClick={() => {
+                      setQuery("");
+                      setSelectedTone("all");
+                    }}
+                  >
+                    clear filters
+                  </button>
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={openAddForm}
+                  >
+                    + add yourself
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <section className="wall" aria-live="polite">
+                {shownPeople.map((person, index) => {
+                  const personNotes = messages.filter(
+                    (m) => m?.personId === person.id,
+                  );
+                  const sparkles = personReactions[person.id] || 0;
+
+                  return (
+                    <article
+                      className={`person-card ${tones.includes(person.tone) ? person.tone : "rose"}`}
+                      key={person.id}
+                      style={{
+                        "--enter-delay": `${Math.min(index, 7) * 65}ms`,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="sticker star reaction-button"
+                        onClick={(e) => handlePersonReaction(e, person.id)}
+                        aria-label={`Send sparkle: ${sparkles} received`}
+                        title="Send sparkle ✨"
+                      >
+                        <span className="sparkle-symbol">✨</span>
+                        {sparkles > 0 && (
+                          <span className="reaction-badge">{sparkles}</span>
+                        )}
+                      </button>
+
+                      <div className="portrait-wrap">
+                        <div
+                          className="portrait"
+                          style={
+                            person.photo
+                              ? { backgroundImage: `url(${person.photo})` }
+                              : {}
+                          }
+                        >
+                          {person.photo ? "" : initials(person.name)}
+                        </div>
+                      </div>
+                      <div className="person-copy">
+                        <div className="name-row">
+                          <h3>{person.name}</h3>
+                          <span className="dot">●</span>
+                        </div>
+                        <span className="handle">@{person.ig}</span>
+                        <p className="about">
+                          {person.about || "say hi if you see me around ♡"}
+                        </p>
+                        {person.song && (
+                          <a
+                            className="song-chip"
+                            href={spotifySearchUrl(person.song)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <span aria-hidden="true">♫</span>
+                            <span>
+                              <strong>{person.song.title}</strong>
+                              {person.song.artist && (
+                                <small>{person.song.artist}</small>
+                              )}
+                            </span>
+                          </a>
+                        )}
+                        <div className="links">
+                          <span className="social-summary">
+                            {safeLinkedIn(person.linkedin)
+                              ? "instagram · linkedin"
+                              : "instagram"}
+                          </span>
+                          {personNotes.length > 0 && (
+                            <span className="note-count-pill">
+                              💬 {personNotes.length}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          className="card-open"
+                          onClick={() => openProfile(person)}
+                        >
+                          view profile & leave a note ↗
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </section>
+            )}
+
+            <section
+              className="music-gallery"
+              aria-labelledby="musicGalleryTitle"
+            >
+              <div className="music-gallery-head">
+                <div>
+                  <div className="tiny">our soundtrack</div>
+                  <h2 id="musicGalleryTitle">on repeat ♫</h2>
+                </div>
+                <p>little songs, recommended by the room</p>
+              </div>
+              {musicRecommendations.length ? (
+                <div className="music-grid">
+                  {musicRecommendations.map((person) => (
+                    <a
+                      className="music-card"
+                      href={spotifySearchUrl(person.song)}
+                      target="_blank"
+                      rel="noreferrer"
+                      key={`${person.id}-song`}
+                    >
+                      <span className="vinyl" aria-hidden="true">
+                        <i />
+                      </span>
+                      <span className="music-copy">
+                        <strong>{person.song.title}</strong>
+                        {person.song.artist && (
+                          <span>{person.song.artist}</span>
+                        )}
+                        <small>recommended by {person.name}</small>
+                      </span>
+                      <span className="listen-label">listen on Spotify ↗</span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="music-empty">
+                  The first song recommendation will appear here ♫
+                </p>
+              )}
+            </section>
           </div>
-          {musicRecommendations.length ? (
-            <div className="music-grid">
-              {musicRecommendations.map((person) => (
-                <a className="music-card" href={spotifySearchUrl(person.song)} target="_blank" rel="noreferrer" key={`${person.id}-song`}>
-                  <span className="vinyl" aria-hidden="true"><i /></span>
-                  <span className="music-copy"><strong>{person.song.title}</strong>{person.song.artist && <span>{person.song.artist}</span>}<small>recommended by {person.name}</small></span>
-                  <span className="listen-label">listen on Spotify ↗</span>
-                </a>
-              ))}
-            </div>
-          ) : <p className="music-empty">The first song recommendation will appear here ♫</p>}
-        </section>
+        ) : (
+          <div className="view-container view-fade-in">
+            <EventGallery
+              memories={memories}
+              onOpenPhoto={openLightbox}
+              onOpenAddMemory={openAddMemory}
+              query={query}
+              setQuery={setQuery}
+              likesMap={memoryLikes}
+              onLikeMemory={handleMemoryLike}
+            />
+          </div>
+        )}
+
         <footer>
           <span>
-            made for one room, one afternoon, and a lot of new mutuals ✦
+            {activeTab === "wall"
+              ? "made for one room, one afternoon, and a lot of new mutuals ✦"
+              : "girls' vibe coding moments captured with love ♡"}
           </span>
-          <button onClick={openAddForm}>
-            add yourself ↗
+          <button
+            onClick={activeTab === "wall" ? openAddForm : openAddMemory}
+          >
+            {activeTab === "wall" ? "add yourself ↗" : "share memory ↗"}
           </button>
         </footer>
       </main>
-      <AnimatedDialog
-        ref={formDialog}
-        aria-labelledby="formTitle"
-      >
+
+      {/* Add Profile Modal */}
+      <AnimatedDialog ref={formDialog} aria-labelledby="formTitle">
         <form ref={addForm} className="sheet" onSubmit={addProfile} noValidate>
           {formError && (
             <div className="form-alert" role="alert" key={formErrorKey}>
-              <span className="form-alert-star" aria-hidden="true">✦</span>
+              <span className="form-alert-star" aria-hidden="true">
+                ✦
+              </span>
               <span>{formError}</span>
-              <button type="button" onClick={dismissFormError} aria-label="Dismiss alert">×</button>
+              <button
+                type="button"
+                onClick={dismissFormError}
+                aria-label="Dismiss alert"
+              >
+                ×
+              </button>
             </div>
           )}
           <div className="sheet-head">
@@ -616,15 +990,14 @@ function App() {
             add me to the wall ✦
           </button>
           <p className="micro">
-            This demo stores new cards only in this browser. Connect Supabase
+            This demo stores new cards in this browser. Connect Supabase
             later for a shared live wall.
           </p>
         </form>
       </AnimatedDialog>
-      <AnimatedDialog
-        ref={detailDialog}
-        aria-labelledby="detailName"
-      >
+
+      {/* Profile Detail & Guestbook Modal */}
+      <AnimatedDialog ref={detailDialog} aria-labelledby="detailName">
         {activePerson && (
           <div className="sheet detail-sheet">
             <div className="sheet-head">
@@ -686,13 +1059,16 @@ function App() {
                 only in this browser and aren't sent to this person.
               </p>
               <ul className="message-list" aria-live="polite">
-                {messages.length ? (
-                  messages.map((note) => (
-                    <li key={note.id}>
-                      <strong>{note.author}</strong>
-                      <p>{note.message}</p>
-                    </li>
-                  ))
+                {messages.filter((m) => m?.personId === activePerson.id)
+                  .length ? (
+                  messages
+                    .filter((m) => m?.personId === activePerson.id)
+                    .map((note) => (
+                      <li key={note.id}>
+                        <strong>{note.author}</strong>
+                        <p>{note.message}</p>
+                      </li>
+                    ))
                 ) : (
                   <li className="empty-notes">
                     No notes yet. Be the first to say hi ♡
@@ -731,15 +1107,27 @@ function App() {
           </div>
         )}
       </AnimatedDialog>
-      <AnimatedDialog ref={photoDialog} className="photo-dialog" aria-labelledby="photoCaption">
-        <div className="photo-lightbox">
-          <button className="close photo-close" type="button" aria-label="Close photo" onClick={() => photoDialog.current.close()}>×</button>
-          {activePhoto && <figure>
-            <img src={activePhoto.src} alt={activePhoto.alt} />
-            <figcaption id="photoCaption">{activePhoto.caption}</figcaption>
-          </figure>}
-        </div>
-      </AnimatedDialog>
+
+      {/* Add Memory Modal */}
+      <AddMemoryModal
+        dialogRef={memoryDialog}
+        onAddMemory={handleAddMemory}
+        compressImage={compressImage}
+        notify={notify}
+      />
+
+      {/* Interactive Lightbox */}
+      <Lightbox
+        dialogRef={photoDialog}
+        activeItem={activeLightboxItem}
+        onNext={nextLightboxPhoto}
+        onPrev={prevLightboxPhoto}
+        hasNext={lightboxData.items.length > 1}
+        hasPrev={lightboxData.items.length > 1}
+        onClose={closeLightbox}
+      />
+
+      {/* Toast */}
       <div
         className={`toast ${toast ? "show" : ""}`}
         role="status"
@@ -750,4 +1138,5 @@ function App() {
     </>
   );
 }
+
 export default App;
