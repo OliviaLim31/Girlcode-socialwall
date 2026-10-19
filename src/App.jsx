@@ -524,7 +524,7 @@ function App() {
               scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            <span className="site-brand-mark">✦</span>
+            <img src="/logo.png" alt="Girl Code logo" className="site-brand-logo" />
             <span>girlcode social wall</span>
           </a>
 
@@ -601,8 +601,11 @@ function App() {
                   <figcaption>better together ♡</figcaption>
                 </figure>
                 <div className="hero-copy">
-                  <div className="eyebrow">
-                    girls' vibe coding · kl · 12.09.26
+                  <div className="hero-mascot-badge">
+                    <img src="/logo.png" alt="Girl Code mascot" className="hero-mascot-img" />
+                    <div className="eyebrow">
+                      girls' vibe coding · kl · 12.09.26
+                    </div>
                   </div>
                   <h1>
                     we met <em>irl.</em>
@@ -706,7 +709,7 @@ function App() {
 
             {shownPeople.length === 0 ? (
               <div className="empty-state">
-                <span className="empty-icon">🌸</span>
+                <img src="/logo.png" alt="Girl Code mascot" className="empty-mascot-img" />
                 <h3>no profiles found</h3>
                 <p>
                   No cards matched your current search or vibe filter.
@@ -879,11 +882,14 @@ function App() {
         )}
 
         <footer>
-          <span>
-            {activeTab === "wall"
-              ? "made for one room, one afternoon, and a lot of new mutuals ✦"
-              : "girls' vibe coding moments captured with love ♡"}
-          </span>
+          <div className="footer-brand">
+            <img src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
+            <span>
+              {activeTab === "wall"
+                ? "made for one room, one afternoon, and a lot of new mutuals ✦"
+                : "girls' vibe coding moments captured with love ♡"}
+            </span>
+          </div>
           <button
             onClick={activeTab === "wall" ? openAddForm : openAddMemory}
           >
@@ -911,9 +917,12 @@ function App() {
             </div>
           )}
           <div className="sheet-head">
-            <div>
-              <div className="tiny">join the wall</div>
-              <h2 id="formTitle">add your little corner ♡</h2>
+            <div className="sheet-head-left">
+              <img src="/logo.png" alt="Girl Code logo" className="sheet-dialog-logo" />
+              <div>
+                <div className="tiny">join the wall</div>
+                <h2 id="formTitle">add your little corner ♡</h2>
+              </div>
             </div>
             <button
               className="close"
@@ -1001,9 +1010,12 @@ function App() {
         {activePerson && (
           <div className="sheet detail-sheet">
             <div className="sheet-head">
-              <div>
-                <div className="tiny">a little more about me</div>
-                <h2 id="detailName">{activePerson.name}</h2>
+              <div className="sheet-head-left">
+                <img src="/logo.png" alt="Girl Code logo" className="sheet-dialog-logo" />
+                <div>
+                  <div className="tiny">a little more about me</div>
+                  <h2 id="detailName">{activePerson.name}</h2>
+                </div>
               </div>
               <button
                 className="close"

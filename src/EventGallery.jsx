@@ -112,7 +112,10 @@ export default function EventGallery({
     <div className="event-gallery-section" aria-label="Event Gallery">
       <header className="gallery-header">
         <div className="gallery-header-content">
-          <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
+          <div className="gallery-mascot-badge">
+            <img src="/logo.png" alt="Girl Code mascot" className="gallery-mascot-img" />
+            <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
+          </div>
           <h1 className="gallery-title">
             our little <em>moments</em>{" "}
             <span className="highlight-wrap">
@@ -154,7 +157,7 @@ export default function EventGallery({
 
       {filteredMemories.length === 0 ? (
         <div className="empty-gallery-state">
-          <span className="empty-icon">📸</span>
+          <img src="/logo.png" alt="Girl Code mascot" className="empty-mascot-img" />
           <h3>no photos found</h3>
           <p>
             {query

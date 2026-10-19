@@ -101,9 +101,12 @@ export default function AddMemoryModal({
         noValidate
       >
         <div className="sheet-head">
-          <div>
-            <div className="tiny">share an irl memory</div>
-            <h2 id="memoryModalTitle">pin a polaroid 📸</h2>
+          <div className="sheet-head-left">
+            <img src="/logo.png" alt="Girl Code logo" className="sheet-dialog-logo" />
+            <div>
+              <div className="tiny">share an irl memory</div>
+              <h2 id="memoryModalTitle">pin a polaroid 📸</h2>
+            </div>
           </div>
           <button
             className="close"

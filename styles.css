@@ -51,7 +51,12 @@ body:before{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
 .site-brand{display:flex;align-items:center;gap:10px;color:white;text-decoration:none;font-weight:600;white-space:nowrap;font-size:16px}
-.site-brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.22);font-size:16px}
+.site-brand-logo{
+  width:32px;height:32px;border-radius:50%;object-fit:cover;
+  border:1.5px solid rgba(255,255,255,.75);box-shadow:0 2px 10px rgba(0,0,0,.15);
+  background:#fff;transition:transform .25s ease;flex-shrink:0;
+}
+.site-brand:hover .site-brand-logo{transform:rotate(-6deg) scale(1.1)}
 
 /* Nav Tabs */
 .nav-tabs{
@@ -101,6 +106,19 @@ body:before{
 
 .eyebrow,.tiny{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:600}
 .eyebrow{opacity:.7;margin-bottom:18px}
+.hero-mascot-badge,.gallery-mascot-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.45);backdrop-filter:blur(10px);
+  padding:5px 16px 5px 6px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.65);margin-bottom:18px;
+  box-shadow:0 4px 16px rgba(0,0,0,.05);
+}
+.hero-mascot-badge .eyebrow,.gallery-mascot-badge .eyebrow{margin-bottom:0}
+.hero-mascot-img,.gallery-mascot-img{
+  width:32px;height:32px;border-radius:50%;object-fit:cover;
+  background:#fff;border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;
+}
 h1{
   margin:0 auto;max-width:980px;
   font:400 clamp(55px,9vw,108px)/.86 "Instrument Serif",serif;
@@ -223,6 +241,11 @@ h3{font:400 28px/1.1 "Instrument Serif",serif;margin:0;overflow-wrap:anywhere}
   margin:20px 0;
 }
 .empty-icon{font-size:44px;display:block;margin-bottom:12px}
+.empty-mascot-img{
+  width:72px;height:72px;border-radius:20px;object-fit:cover;
+  margin:0 auto 14px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.08);
+  border:2px solid rgba(255,255,255,.85);background:#fff;
+}
 .empty-state h3,.empty-gallery-state h3{font:400 36px/1 "Instrument Serif",serif;margin:0 0 8px}
 .empty-state p,.empty-gallery-state p{font-size:14px;opacity:.75;max-width:400px;margin:0 auto 20px}
 .empty-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
@@ -420,8 +443,14 @@ h3{font:400 28px/1.1 "Instrument Serif",serif;margin:0;overflow-wrap:anywhere}
   border:1px solid rgba(255,255,255,.5);color:inherit;text-decoration:none;font-size:12px;font-weight:600
 }
 footer{
-  margin-top:40px;padding:22px 4px 4px;display:flex;justify-content:space-between;gap:20px;
-  font-size:13px;opacity:.76
+  margin-top:40px;padding:22px 4px 4px;display:flex;justify-content:space-between;align-items:center;gap:20px;
+  font-size:13px;opacity:.76;flex-wrap:wrap;
+}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-logo-img{
+  width:28px;height:28px;border-radius:50%;object-fit:cover;
+  border:1.5px solid rgba(255,255,255,.7);box-shadow:0 2px 6px rgba(0,0,0,.1);
+  background:#fff;flex-shrink:0;
 }
 footer button{border:0;background:transparent;text-decoration:underline}
 
@@ -437,6 +466,12 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .form-alert>span:nth-child(2){overflow-wrap:anywhere}.form-alert button{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(255,255,255,.5);color:#b52b68;font-size:17px;line-height:1}
 @keyframes form-alert-pop{0%{opacity:0;transform:translate(-50%,-62%) scale(.72)}65%{opacity:1;transform:translate(-50%,-48%) scale(1.05)}100%{transform:translate(-50%,-50%) scale(1)}}
 .sheet-head{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:22px}
+.sheet-head-left{display:flex;align-items:center;gap:14px}
+.sheet-dialog-logo{
+  width:46px;height:46px;border-radius:14px;object-fit:cover;
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(157,127,194,.22);
+  flex-shrink:0;background:#fff;
+}
 .sheet h2{font:400 42px/1 "Instrument Serif",serif;margin:5px 0 0}
 .close{color:var(--ink);background:#e6e0d4;width:38px;height:38px;border-radius:50%;font-size:26px}
 .sheet label,.sheet fieldset{display:block;margin-top:15px}
