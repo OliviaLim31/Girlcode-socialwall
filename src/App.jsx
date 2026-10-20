@@ -280,6 +280,18 @@ function App() {
   const [messageError, setMessageError] = useState("");
   const [formError, setFormError] = useState("");
   const [formErrorKey, setFormErrorKey] = useState(0);
+  const [avatarPreview, setAvatarPreview] = useState("");
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const preview = await compressImage(file, 400, 0.85);
+      setAvatarPreview(preview);
+    } catch {
+      // ignore
+    }
+  };
 
   const showFormError = (message) => {
     window.clearTimeout(showFormError.timer);
@@ -295,6 +307,7 @@ function App() {
 
   const openAddForm = () => {
     dismissFormError();
+    setAvatarPreview("");
     formDialog.current.showModal();
   };
 
@@ -445,6 +458,7 @@ function App() {
       }
       setPeople((current) => [...current, person]);
       setQuery("");
+      setAvatarPreview("");
       dismissFormError();
       form.reset();
       formDialog.current.close();
@@ -552,7 +566,7 @@ function App() {
             </button>
           </nav>
 
-          <label className="site-search">
+          <div className="site-search">
             <span aria-hidden="true">⌕</span>
             <input
               value={query}
@@ -566,7 +580,18 @@ function App() {
               autoComplete="off"
               aria-label="Search"
             />
-          </label>
+            {query && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
           <button
             className="nav-add"
@@ -973,12 +998,52 @@ function App() {
               placeholder=" e.g. Espresso — Sabrina Carpenter"
             />
           </label>
-          <label>
-            <span>
+          <div className="avatar-upload-field">
+            <span className="avatar-label">
               profile photo <i>optional</i>
             </span>
-            <input name="photo" type="file" accept="image/*" />
-          </label>
+            <div className="avatar-upload-row">
+              <div
+                className="avatar-live-preview"
+                style={
+                  avatarPreview
+                    ? { backgroundImage: `url(${avatarPreview})` }
+                    : {}
+                }
+              >
+                {!avatarPreview && <span className="avatar-placeholder-star">✦</span>}
+              </div>
+              <div className="avatar-upload-actions">
+                <input
+                  name="photo"
+                  type="file"
+                  id="profile-avatar-input"
+                  accept="image/*"
+                  className="visually-hidden-file"
+                  onChange={handleAvatarChange}
+                />
+                <div className="avatar-btns-group">
+                  <label htmlFor="profile-avatar-input" className="avatar-pick-btn">
+                    {avatarPreview ? "change photo" : "choose photo"}
+                  </label>
+                  {avatarPreview && (
+                    <button
+                      type="button"
+                      className="avatar-clear-btn"
+                      onClick={() => {
+                        setAvatarPreview("");
+                        const el = document.getElementById("profile-avatar-input");
+                        if (el) el.value = "";
+                      }}
+                    >
+                      remove
+                    </button>
+                  )}
+                </div>
+                <small className="avatar-note">looks best in square crop ♡</small>
+              </div>
+            </div>
+          </div>
           <fieldset>
             <legend>pick a card vibe</legend>
             <div className="swatches">
@@ -1077,7 +1142,17 @@ function App() {
                     .filter((m) => m?.personId === activePerson.id)
                     .map((note) => (
                       <li key={note.id}>
-                        <strong>{note.author}</strong>
+                        <div className="note-head">
+                          <strong>{note.author}</strong>
+                          {note.createdAt && (
+                            <span className="note-date">
+                              {new Date(note.createdAt).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </div>
                         <p>{note.message}</p>
                       </li>
                     ))
