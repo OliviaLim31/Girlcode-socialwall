@@ -538,8 +538,16 @@ function App() {
               scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            <img src="/logo.png" alt="GirlCode logo" className="site-brand-logo" />
-            <span className="site-brand-text">GirlCode</span>
+            <img
+              src="/girl-mascot.png"
+              alt="GirlCode mascot"
+              className="site-brand-mascot"
+            />
+            <img
+              src="/logo-text.png"
+              alt="girl code"
+              className="site-brand-wordmark"
+            />
           </a>
 
           {/* Tab Switcher */}
