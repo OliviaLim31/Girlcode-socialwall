@@ -314,22 +314,41 @@ h3{font:400 28px/1.1 "Instrument Serif",serif;margin:0;overflow-wrap:anywhere}
 .count-number{font-weight:700;color:var(--ink)}
 .gallery-add-btn{font-size:13px;padding:9px 18px}
 
-.gallery-event-tabs{
-  display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
+.gallery-toolbar{
+  display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:14px;
 }
-.event-date-tab{
-  background:rgba(255,255,255,.6);border:1.5px solid rgba(230,220,235,.8);
-  backdrop-filter:blur(10px);padding:8px 18px;border-radius:999px;
-  font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;
-  transition:all .2s ease;letter-spacing:-.01em;box-shadow:0 2px 8px rgba(47,49,38,.04);
+.seg-control{
+  display:inline-flex;padding:4px;gap:2px;border-radius:999px;
+  background:rgba(255,255,255,.55);backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(47,49,38,.05);
 }
-.event-date-tab:hover{
-  background:rgba(255,255,255,.95);transform:translateY(-1px);
-  box-shadow:0 4px 12px rgba(47,49,38,.08);
+.seg-item{
+  border:0;background:transparent;padding:7px 18px;border-radius:999px;
+  font-size:13px;font-weight:600;color:rgba(35,35,31,.55);cursor:pointer;
+  transition:background .25s ease,color .25s ease,box-shadow .25s ease;
 }
-.event-date-tab.active{
-  background:var(--ink);color:white;border-color:var(--ink);
-  box-shadow:0 4px 16px rgba(35,35,31,.25);
+.seg-item:hover{color:var(--ink)}
+.seg-item.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(47,49,38,.12)}
+.gallery-add-fab{
+  width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--ink);color:#fff;font-size:20px;line-height:1;font-weight:300;
+  display:grid;place-items:center;box-shadow:0 6px 16px rgba(35,35,31,.25);
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease;
+}
+.gallery-add-fab:hover{transform:rotate(90deg) scale(1.08);box-shadow:0 8px 22px rgba(35,35,31,.32)}
+.gallery-chips-row{
+  display:flex;justify-content:center;gap:4px;flex-wrap:wrap;
+}
+.quiet-chip{
+  border:0;background:transparent;padding:6px 14px;border-radius:999px;
+  font-size:13px;font-weight:500;color:rgba(35,35,31,.55);cursor:pointer;
+  transition:background .2s ease,color .2s ease;
+}
+.quiet-chip:hover{color:var(--ink);background:rgba(255,255,255,.4)}
+.quiet-chip.active{color:var(--ink);font-weight:700;background:rgba(255,255,255,.75)}
+.gallery-count-text{
+  margin:10px 0 0;text-align:center;font-size:12px;letter-spacing:.04em;
+  color:rgba(35,35,31,.45);
 }
 
 .gallery-filter-chips{

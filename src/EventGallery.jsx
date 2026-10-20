@@ -103,8 +103,8 @@ export const memoryTags = [
 ];
 
 export const eventDates = [
-  { id: "all", label: "✦ All Events" },
-  { id: "12.09.2026", label: "🗓 12.09.2026 (KL Meetup)" },
+  { id: "all", label: "All" },
+  { id: "12.09.2026", label: "12.09.2026" },
 ];
 
 export default function EventGallery({
@@ -157,47 +157,46 @@ export default function EventGallery({
           </p>
         </div>
 
-        <div className="gallery-action-bar">
-          <div className="gallery-count-pill">
-            <span className="count-number">{filteredMemories.length}</span>
-            <span>memories captured</span>
+        <div className="gallery-toolbar">
+          <div className="seg-control" role="tablist" aria-label="Filter by meetup event">
+            {eventDates.map((evt) => (
+              <button
+                key={evt.id}
+                type="button"
+                role="tab"
+                aria-selected={selectedEventDate === evt.id}
+                className={`seg-item ${selectedEventDate === evt.id ? "active" : ""}`}
+                onClick={() => setSelectedEventDate(evt.id)}
+              >
+                {evt.label}
+              </button>
+            ))}
           </div>
           <button
             type="button"
-            className="primary gallery-add-btn"
+            className="gallery-add-fab"
             onClick={onOpenAddMemory}
+            aria-label="Share a memory"
           >
-            + share a memory
+            <span aria-hidden="true">+</span>
           </button>
         </div>
 
-        {/* Monthly Event Date Tabs */}
-        <div className="gallery-event-tabs" role="tablist" aria-label="Filter by meetup event">
-          {eventDates.map((evt) => (
-            <button
-              key={evt.id}
-              type="button"
-              className={`event-date-tab ${selectedEventDate === evt.id ? "active" : ""}`}
-              onClick={() => setSelectedEventDate(evt.id)}
-            >
-              {evt.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Category Vibe Filter Chips */}
-        <div className="gallery-filter-chips" role="tablist" aria-label="Memory categories">
+        <div className="gallery-chips-row" role="tablist" aria-label="Memory categories">
           {memoryTags.map((tag) => (
             <button
               key={tag}
               type="button"
-              className={`tag-chip ${activeTag === tag ? "active" : ""}`}
+              role="tab"
+              aria-selected={activeTag === tag}
+              className={`quiet-chip ${activeTag === tag ? "active" : ""}`}
               onClick={() => setActiveTag(tag)}
             >
-              {tag === "All Moments" ? "✦ All Moments" : tag}
+              {tag === "All Moments" ? "All" : tag}
             </button>
           ))}
         </div>
+        <p className="gallery-count-text">{filteredMemories.length} moments</p>
       </header>
 
       {filteredMemories.length === 0 ? (
