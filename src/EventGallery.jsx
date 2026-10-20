@@ -2,85 +2,109 @@ import { useMemo, useState } from "react";
 
 export const defaultMemories = [
   {
-    id: "mem-1",
-    src: "/images/event-coding.jpg",
-    title: "Matcha & Vibe Coding",
-    caption: "Laptops covered in stickers, iced matcha lattes, and everyone in the flow state building side quests.",
-    tag: "Coding & Vibe",
-    date: "12 Sept 2026",
-    author: "Olivia",
-    baseLikes: 18,
-    tilt: "-2deg",
-    tapeColor: "rgba(228, 211, 232, 0.85)",
-  },
-  {
-    id: "mem-2",
-    src: "/images/event-demo.jpg",
-    title: "Show & Tell Magic",
-    caption: "Sharing little screen experiments and quirky code projects that somehow worked!",
-    tag: "Show & Tell",
-    date: "12 Sept 2026",
-    author: "Zhi Wei",
-    baseLikes: 24,
-    tilt: "2.5deg",
-    tapeColor: "rgba(230, 223, 180, 0.85)",
-  },
-  {
-    id: "mem-3",
-    src: "/images/event-cheers.jpg",
-    title: "Cheers to New Mutuals",
-    caption: "Sweet sips, colorful friendship bracelets, and clinking iced glasses in the afternoon light.",
-    tag: "Coffee & Hangout",
-    date: "12 Sept 2026",
-    author: "Edwina",
-    baseLikes: 31,
-    tilt: "-2.8deg",
-    tapeColor: "rgba(209, 226, 239, 0.85)",
-  },
-  {
-    id: "mem-4",
-    src: "/images/polaroid-together.jpg",
-    title: "Better Together ♡",
-    caption: "Our official group polaroid. 1 room, 1 afternoon, and countless new connections.",
+    id: "mem-group-1",
+    src: "/events/12.09.2026/hero-group.jpg",
+    title: "Girls Only Vibe Coding KL ♡",
+    caption: "The full room together! Countless laughs, shared code, stickers, and new mutuals.",
     tag: "Group Love",
-    date: "12 Sept 2026",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
     author: "Girls in KL",
-    baseLikes: 42,
-    tilt: "1.8deg",
+    baseLikes: 58,
+    tilt: "1.2deg",
     tapeColor: "rgba(247, 201, 215, 0.85)",
   },
   {
-    id: "mem-5",
-    src: "/images/polaroid-create.jpg",
-    title: "Girls Only Vibe Code",
-    caption: "The screen schedule poster that brought all of us together into the same room.",
+    id: "mem-poster",
+    src: "/events/12.09.2026/event-poster.jpg",
+    title: "Girls Only Vibe Code Session",
+    caption: "The schedule poster that brought all of us together into the same room on Saturday afternoon.",
     tag: "Coding & Vibe",
-    date: "12 Sept 2026",
-    author: "Hana",
-    baseLikes: 15,
-    tilt: "-1.5deg",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
+    author: "Olivia",
+    baseLikes: 35,
+    tilt: "-1.8deg",
     tapeColor: "rgba(224, 235, 200, 0.85)",
   },
   {
-    id: "mem-6",
-    src: "/images/GC Group.jpg",
-    title: "The Warmest Vibe",
-    caption: "Huge smiles and high energy right before packing up our laptops.",
-    tag: "Group Love",
-    date: "12 Sept 2026",
+    id: "mem-demo",
+    src: "/events/12.09.2026/event-demo-real.jpg",
+    title: "Project Show & Tell",
+    caption: "Gathering around the laptop screens to cheer on each other's live web experiments and side quests.",
+    tag: "Show & Tell",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
+    author: "Zhi Wei",
+    baseLikes: 42,
+    tilt: "2.1deg",
+    tapeColor: "rgba(230, 223, 180, 0.85)",
+  },
+  {
+    id: "mem-sharing",
+    src: "/events/12.09.2026/event-sharing.jpg",
+    title: "Live Walkthrough & Ideas",
+    caption: "Hands-on debugging and walkthroughs together. Learning made so much warmer in person.",
+    tag: "Show & Tell",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
+    author: "Girls in KL",
+    baseLikes: 27,
+    tilt: "-2.4deg",
+    tapeColor: "rgba(209, 226, 239, 0.85)",
+  },
+  {
+    id: "mem-collab",
+    src: "/events/12.09.2026/event-collab.jpg",
+    title: "Pair Coding Flow State",
+    caption: "Two heads are better than one! Tackling CSS, logic, and animations side-by-side.",
+    tag: "Coding & Vibe",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
+    author: "Edwina",
+    baseLikes: 39,
+    tilt: "1.6deg",
+    tapeColor: "rgba(228, 211, 232, 0.85)",
+  },
+  {
+    id: "mem-table",
+    src: "/events/12.09.2026/event-table.jpg",
+    title: "Matcha, Laptops & Warmth",
+    caption: "Iced matcha, French fries, laptops, and good company under the warm cafe lighting.",
+    tag: "Coffee & Hangout",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
     author: "Taiba",
-    baseLikes: 29,
-    tilt: "2.2deg",
+    baseLikes: 33,
+    tilt: "-1.5deg",
     tapeColor: "rgba(238, 215, 235, 0.85)",
+  },
+  {
+    id: "mem-atmosphere",
+    src: "/events/12.09.2026/event-atmosphere.jpg",
+    title: "The Vibe in the Room",
+    caption: "A bird's eye glimpse of everyone building their ideas in the loft space.",
+    tag: "Coffee & Hangout",
+    eventDate: "12.09.2026",
+    date: "12.09.2026",
+    author: "Hana",
+    baseLikes: 31,
+    tilt: "2.5deg",
+    tapeColor: "rgba(224, 235, 200, 0.85)",
   },
 ];
 
 export const memoryTags = [
   "All Moments",
-  "Coding & Vibe",
-  "Coffee & Hangout",
-  "Show & Tell",
   "Group Love",
+  "Coding & Vibe",
+  "Show & Tell",
+  "Coffee & Hangout",
+];
+
+export const eventDates = [
+  { id: "all", label: "✦ All Events" },
+  { id: "12.09.2026", label: "🗓 12.09.2026 (KL Meetup)" },
 ];
 
 export default function EventGallery({
@@ -93,20 +117,26 @@ export default function EventGallery({
   onLikeMemory,
 }) {
   const [activeTag, setActiveTag] = useState("All Moments");
+  const [selectedEventDate, setSelectedEventDate] = useState("all");
 
   const filteredMemories = useMemo(() => {
     return memories.filter((item) => {
+      const matchesEvent =
+        selectedEventDate === "all" ||
+        item.eventDate === selectedEventDate ||
+        item.date === selectedEventDate ||
+        (item.date && item.date.includes("12 Sept 2026") && selectedEventDate === "12.09.2026");
       const matchesTag =
         activeTag === "All Moments" || item.tag === activeTag;
       const q = query.toLowerCase().trim();
       const matchesQuery =
         !q ||
-        `${item.title} ${item.caption} ${item.tag} ${item.author || ""}`
+        `${item.title} ${item.caption} ${item.tag} ${item.author || ""} ${item.eventDate || ""} ${item.date || ""}`
           .toLowerCase()
           .includes(q);
-      return matchesTag && matchesQuery;
+      return matchesEvent && matchesTag && matchesQuery;
     });
-  }, [memories, activeTag, query]);
+  }, [memories, selectedEventDate, activeTag, query]);
 
   return (
     <div className="event-gallery-section" aria-label="Event Gallery">
@@ -114,10 +144,10 @@ export default function EventGallery({
         <div className="gallery-header-content">
           <div className="gallery-mascot-badge">
             <img src="/logo.png" alt="Girl Code mascot" className="gallery-mascot-img" />
-            <div className="eyebrow">girls' vibe coding · kl · 12.09.26</div>
+            <div className="eyebrow">girls' vibe coding · kl · 12.09.2026</div>
           </div>
           <h1 className="gallery-title">
-            our little <em>moments</em>{" "}
+            our real <em>moments</em>{" "}
             <span className="highlight-wrap">
               <span className="highlight">irl.</span>
             </span>
@@ -141,6 +171,21 @@ export default function EventGallery({
           </button>
         </div>
 
+        {/* Monthly Event Date Tabs */}
+        <div className="gallery-event-tabs" role="tablist" aria-label="Filter by meetup event">
+          {eventDates.map((evt) => (
+            <button
+              key={evt.id}
+              type="button"
+              className={`event-date-tab ${selectedEventDate === evt.id ? "active" : ""}`}
+              onClick={() => setSelectedEventDate(evt.id)}
+            >
+              {evt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Category Vibe Filter Chips */}
         <div className="gallery-filter-chips" role="tablist" aria-label="Memory categories">
           {memoryTags.map((tag) => (
             <button

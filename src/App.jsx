@@ -188,22 +188,22 @@ async function createProfileOnBackend(person) {
 const heroPolaroids = [
   {
     id: "hero-1",
-    src: "/images/polaroid-together.jpg",
-    alt: "Group photo at the girls' vibe coding session",
+    src: "/events/12.09.2026/hero-group.jpg",
+    alt: "Group photo of all girls at the Girls Only Vibe Code Session in KL",
     title: "Better Together ♡",
-    caption: "Group photo at the girls' vibe coding session in KL.",
+    caption: "The full crew! All the wonderful girls at the KL Vibe Coding Session.",
     tag: "Group Love",
-    date: "12.09.26",
+    date: "12.09.2026",
     author: "Girls in KL",
   },
   {
     id: "hero-2",
-    src: "/images/polaroid-create.jpg",
+    src: "/events/12.09.2026/event-poster.jpg",
     alt: "Laptop displaying the Girls Only Vibe Code Session poster and event schedule",
     title: "Little Ideas, Big Energy ✦",
     caption: "Laptop displaying the Girls Only Vibe Code Session poster and event schedule.",
     tag: "Coding & Vibe",
-    date: "12.09.26",
+    date: "12.09.2026",
     author: "KL Meetup",
   },
 ];
@@ -634,10 +634,10 @@ function App() {
                     onClick={() => openLightbox(heroPolaroids, 0)}
                   >
                     <img
-                      src="/images/polaroid-together.jpg"
-                      alt="Group photo at the girls' vibe coding session"
-                      width="2560"
-                      height="1919"
+                      src="/events/12.09.2026/hero-group.jpg"
+                      alt="Group photo of all girls at the Girls Only Vibe Code Session"
+                      width="5712"
+                      height="4284"
                     />
                     <span className="photo-zoom-hint" aria-hidden="true">
                       view photo ↗
@@ -649,7 +649,7 @@ function App() {
                   <div className="hero-mascot-badge">
                     <img src="/logo.png" alt="Girl Code mascot" className="hero-mascot-img" />
                     <div className="eyebrow">
-                      girls' vibe coding · kl · 12.09.26
+                      girls' vibe coding · kl · 12.09.2026
                     </div>
                   </div>
                   <h1>
@@ -674,10 +674,10 @@ function App() {
                     onClick={() => openLightbox(heroPolaroids, 1)}
                   >
                     <img
-                      src="/images/polaroid-create.jpg"
+                      src="/events/12.09.2026/event-poster.jpg"
                       alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule"
-                      width="1920"
-                      height="2560"
+                      width="3024"
+                      height="4032"
                     />
                     <span className="photo-zoom-hint" aria-hidden="true">
                       view photo ↗

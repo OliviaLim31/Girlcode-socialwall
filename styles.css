@@ -314,6 +314,24 @@ h3{font:400 28px/1.1 "Instrument Serif",serif;margin:0;overflow-wrap:anywhere}
 .count-number{font-weight:700;color:var(--ink)}
 .gallery-add-btn{font-size:13px;padding:9px 18px}
 
+.gallery-event-tabs{
+  display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
+}
+.event-date-tab{
+  background:rgba(255,255,255,.6);border:1.5px solid rgba(230,220,235,.8);
+  backdrop-filter:blur(10px);padding:8px 18px;border-radius:999px;
+  font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;
+  transition:all .2s ease;letter-spacing:-.01em;box-shadow:0 2px 8px rgba(47,49,38,.04);
+}
+.event-date-tab:hover{
+  background:rgba(255,255,255,.95);transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(47,49,38,.08);
+}
+.event-date-tab.active{
+  background:var(--ink);color:white;border-color:var(--ink);
+  box-shadow:0 4px 16px rgba(35,35,31,.25);
+}
+
 .gallery-filter-chips{
   display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
 }

@@ -40,7 +40,8 @@ export default function AddMemoryModal({
     const title = String(data.get("title") || "").trim();
     const caption = String(data.get("caption") || "").trim();
     const author = String(data.get("author") || "").trim();
-    const tag = String(data.get("tag") || "Coding & Vibe");
+    const tag = String(data.get("tag") || "Group Love");
+    const eventDate = String(data.get("eventDate") || "12.09.2026");
 
     if (!photoPreview) {
       setError("Please select a photo to share!");
@@ -67,7 +68,8 @@ export default function AddMemoryModal({
         title,
         caption: caption || "a sweet moment captured at girlcode ♡",
         tag,
-        date: "12 Sept 2026",
+        eventDate,
+        date: eventDate,
         author,
         baseLikes: 1,
         tilt: randomTilt,
@@ -182,12 +184,19 @@ export default function AddMemoryModal({
         </label>
 
         <label>
+          <span>meetup event</span>
+          <select name="eventDate" className="memory-select" defaultValue="12.09.2026">
+            <option value="12.09.2026">🗓 12.09.2026 — KL Meetup</option>
+          </select>
+        </label>
+
+        <label>
           <span>category vibe</span>
           <select name="tag" className="memory-select" defaultValue="Coding & Vibe">
-            <option value="Coding & Vibe">✦ Coding & Vibe</option>
-            <option value="Coffee & Hangout">🧋 Coffee & Hangout</option>
-            <option value="Show & Tell">✨ Show & Tell</option>
             <option value="Group Love">♡ Group Love</option>
+            <option value="Coding & Vibe">✦ Coding & Vibe</option>
+            <option value="Show & Tell">✨ Show & Tell</option>
+            <option value="Coffee & Hangout">🧋 Coffee & Hangout</option>
           </select>
         </label>
 
