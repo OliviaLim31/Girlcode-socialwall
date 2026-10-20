@@ -521,6 +521,21 @@ function App() {
     }
   };
 
+  const handleGoHome = (event) => {
+    event?.preventDefault();
+    setActiveTab("wall");
+    setQuery("");
+    setSelectedTone("all");
+    if (formDialog.current?.open) formDialog.current.close();
+    if (detailDialog.current?.open) detailDialog.current.close();
+    if (photoDialog.current?.open) photoDialog.current.close();
+    if (memoryDialog.current?.open) memoryDialog.current.close();
+    if (lightboxData.isOpen) {
+      setLightboxData((prev) => ({ ...prev, isOpen: false }));
+    }
+    scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const activeLightboxItem =
     lightboxData.items[lightboxData.currentIndex] || null;
 
@@ -533,10 +548,7 @@ function App() {
           <a
             className="site-brand"
             href="#top"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollTo({ top: 0, behavior: "smooth" });
-            }}
+            onClick={handleGoHome}
           >
             <img
               src="/girl-mascot.png"
