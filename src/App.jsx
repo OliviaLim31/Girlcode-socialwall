@@ -1062,17 +1062,15 @@ function App() {
       </AnimatedDialog>
 
       {/* Profile Detail & Guestbook Modal */}
-      <AnimatedDialog ref={detailDialog} aria-labelledby="detailName">
+      <AnimatedDialog
+        ref={detailDialog}
+        className="detail-dialog"
+        aria-labelledby="detailName"
+      >
         {activePerson && (
           <div className="sheet detail-sheet">
-            <div className="sheet-head">
-              <div className="sheet-head-left">
-                <img src="/logo.png" alt="Girl Code logo" className="sheet-dialog-logo" />
-                <div>
-                  <div className="tiny">a little more about me</div>
-                  <h2 id="detailName">{activePerson.name}</h2>
-                </div>
-              </div>
+            <div className="detail-sheet-head">
+              <span className="detail-card-label">GIRLCODE · MEMBER PROFILE</span>
               <button
                 className="close"
                 type="button"
@@ -1082,50 +1080,56 @@ function App() {
                 ×
               </button>
             </div>
-            <div
-              className="detail-portrait portrait"
-              style={
-                activePerson.photo
-                  ? { backgroundImage: `url(${activePerson.photo})` }
-                  : {}
-              }
-            >
-              {activePerson.photo ? "" : initials(activePerson.name)}
-            </div>
-            <p className="handle">@{activePerson.ig}</p>
-            <p className="detail-about">
-              {activePerson.about || "say hi if you see me around ♡"}
-            </p>
-            <div className="links">
-              <a
-                className="pill"
-                href={`https://instagram.com/${encodeURIComponent(activePerson.ig)}`}
-                target="_blank"
-                rel="noreferrer"
+            <div className={`detail-profile ${activePerson.tone || "rose"}`}>
+              <div
+                className="detail-portrait portrait"
+                style={
+                  activePerson.photo
+                    ? { backgroundImage: `url(${activePerson.photo})` }
+                    : {}
+                }
               >
-                instagram ↗
-              </a>
-              {safeLinkedIn(activePerson.linkedin) ? (
-                <a
-                  className="pill"
-                  href={safeLinkedIn(activePerson.linkedin)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  linkedin ↗
-                </a>
-              ) : (
-                <span className="pill unavailable">
-                  linkedin · not provided
-                </span>
-              )}
+                {activePerson.photo ? "" : initials(activePerson.name)}
+              </div>
+              <div className="detail-copy">
+                <span className="detail-field-label">NAME</span>
+                <h2 id="detailName">{activePerson.name}</h2>
+                <p className="detail-handle">@{activePerson.ig}</p>
+                <p className="detail-about">
+                  {activePerson.about || "say hi if you see me around ♡"}
+                </p>
+                <div className="links">
+                  <a
+                    className="pill"
+                    href={`https://instagram.com/${encodeURIComponent(activePerson.ig)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    instagram ↗
+                  </a>
+                  {safeLinkedIn(activePerson.linkedin) ? (
+                    <a
+                      className="pill"
+                      href={safeLinkedIn(activePerson.linkedin)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      linkedin ↗
+                    </a>
+                  ) : (
+                    <span className="pill unavailable">
+                      linkedin · not provided
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
             <section className="guestbook">
               <h3>leave a little note ♡</h3>
               <p className="note-help privacy-note">
-                Notes messages are saved in this browser only, not directly send to the person.
-                Other people using this browser may be able to see
-                them, so please do not include private information!!
+                Notes are saved in this browser only; they are not sent to the
+                person. Anyone using this browser may be able to see them, so
+                please do not include private information.
               </p>
               <ul className="message-list" aria-live="polite">
                 {messages.filter((m) => m?.personId === activePerson.id)
