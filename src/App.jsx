@@ -1098,6 +1098,25 @@ function App() {
                 <p className="detail-about">
                   {activePerson.about || "say hi if you see me around ♡"}
                 </p>
+                {activePerson.song?.title && (
+                  <a
+                    className="detail-song"
+                    href={spotifySearchUrl(activePerson.song)}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Search Spotify for ${activePerson.song.title}${activePerson.song.artist ? ` by ${activePerson.song.artist}` : ""}`}
+                  >
+                    <span className="detail-song-icon" aria-hidden="true">♫</span>
+                    <span className="detail-song-copy">
+                      <span className="detail-song-label">ON REPEAT</span>
+                      <strong>{activePerson.song.title}</strong>
+                      {activePerson.song.artist && (
+                        <small>{activePerson.song.artist}</small>
+                      )}
+                    </span>
+                    <span className="detail-song-link" aria-hidden="true">↗</span>
+                  </a>
+                )}
                 <div className="links">
                   <a
                     className="pill"

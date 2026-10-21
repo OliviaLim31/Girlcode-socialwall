@@ -591,6 +591,15 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .detail-copy h2{font-size:38px;overflow-wrap:anywhere}
 .detail-handle{margin:7px 0 0;font-size:13px;font-weight:600;overflow-wrap:anywhere}
 .detail-about{line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;margin:10px 0 0}
+.detail-song{display:flex;align-items:center;gap:10px;min-width:0;margin-top:12px;padding:9px 11px;border:1px solid rgba(35,35,31,.1);border-radius:14px;background:rgba(255,255,255,.58);color:inherit;text-decoration:none;transition:transform .18s ease,background .18s ease}
+.detail-song:hover{transform:translateY(-2px);background:rgba(255,255,255,.82)}
+.detail-song-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.78);font-size:18px}
+.detail-song-copy{display:grid;min-width:0;gap:2px}
+.detail-song-label{font-size:8px;font-weight:700;letter-spacing:.12em;opacity:.62}
+.detail-song-copy strong,.detail-song-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail-song-copy strong{font-size:12px}
+.detail-song-copy small{font-size:10px;opacity:.7}
+.detail-song-link{margin-left:auto;font-size:13px}
 .detail-copy .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
 .detail-copy .pill{background:rgba(255,255,255,.68);border-color:rgba(35,35,31,.1)}
 .unavailable{opacity:.55}
