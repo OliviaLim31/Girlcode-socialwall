@@ -163,6 +163,17 @@ h1 em{font-weight:400}
 }
 .sub{font-size:17px;margin:26px 0 0;opacity:.78}
 .hero-actions{display:flex;justify-content:center;gap:10px;margin-top:30px;flex-wrap:wrap}
+
+@media (min-width:861px) and (max-height:820px){
+  .shell{margin-top:12px}
+  .hero{padding:20px 12px 24px}
+  .hero-intro{gap:24px;padding:4px 8px 8px}
+  .hero-copy h1{font-size:clamp(54px,5.8vw,72px)}
+  .hero-mascot-badge{margin-bottom:12px}
+  .sub{margin-top:16px}
+  .hero .text-loop{height:140px;margin-top:4px;margin-bottom:-8px}
+}
+
 button{font:inherit;cursor:pointer}
 .primary,.ghost,.submit{
   border-radius:999px;padding:13px 18px;border:1px solid var(--line);
