@@ -243,17 +243,6 @@ function App() {
     }
   });
 
-  // Reaction states
-  const [personReactions, setPersonReactions] = useState(() => {
-    try {
-      return JSON.parse(
-        localStorage.getItem("girlcode-socialwall-reactions") || "{}",
-      );
-    } catch {
-      return {};
-    }
-  });
-
   const [memoryLikes, setMemoryLikes] = useState(() => {
     try {
       return JSON.parse(
@@ -344,20 +333,6 @@ function App() {
 
   const closeLightbox = () => {
     photoDialog.current.close();
-  };
-
-  // Handle Person Reaction (Sparkle)
-  const handlePersonReaction = (e, personId) => {
-    e.stopPropagation();
-    setPersonReactions((prev) => {
-      const next = { ...prev, [personId]: (prev[personId] || 0) + 1 };
-      localStorage.setItem(
-        "girlcode-socialwall-reactions",
-        JSON.stringify(next),
-      );
-      return next;
-    });
-    notify("sent a sparkle ✨");
   };
 
   // Handle Memory Like
@@ -785,8 +760,6 @@ function App() {
                   const personNotes = messages.filter(
                     (m) => m?.personId === person.id,
                   );
-                  const sparkles = personReactions[person.id] || 0;
-
                   return (
                     <article
                       className={`person-card ${tones.includes(person.tone) ? person.tone : "rose"}`}
@@ -795,40 +768,29 @@ function App() {
                         "--enter-delay": `${Math.min(index, 7) * 65}ms`,
                       }}
                     >
-                      <button
-                        type="button"
-                        className="sticker star reaction-button"
-                        onClick={(e) => handlePersonReaction(e, person.id)}
-                        aria-label={`Send sparkle: ${sparkles} received`}
-                        title="Send sparkle ✨"
-                      >
-                        <span className="sparkle-symbol">✨</span>
-                        {sparkles > 0 && (
-                          <span className="reaction-badge">{sparkles}</span>
-                        )}
-                      </button>
-
-                      <div className="portrait-wrap">
-                        <div
-                          className="portrait"
-                          style={
-                            person.photo
-                              ? { backgroundImage: `url(${person.photo})` }
-                              : {}
-                          }
-                        >
-                          {person.photo ? "" : initials(person.name)}
+                      <div className="id-card-copy">
+                        <div className="id-card-top">
+                          <span className="id-card-label">ID-CARD</span>
+                          <span className="id-card-markers" aria-hidden="true">
+                            <i />
+                            <i />
+                            <i />
+                          </span>
                         </div>
-                      </div>
-                      <div className="person-copy">
-                        <div className="name-row">
+                        <div className="id-card-name">
+                          <span className="id-card-field-label">NAME</span>
                           <h3>{person.name}</h3>
-                          <span className="dot">●</span>
                         </div>
-                        <span className="handle">@{person.ig}</span>
-                        <p className="about">
-                          {person.about || "say hi if you see me around ♡"}
-                        </p>
+                        <div className="id-card-handle">
+                          <span className="id-card-field-label">HANDLE</span>
+                          <span>@{person.ig}</span>
+                        </div>
+                        <div className="id-card-skill">
+                          <span className="id-card-field-label">SKILL / VIBE</span>
+                          <p className="about">
+                            {person.about || "say hi if you see me around ♡"}
+                          </p>
+                        </div>
                         {person.song && (
                           <a
                             className="song-chip"
@@ -845,24 +807,32 @@ function App() {
                             </span>
                           </a>
                         )}
-                        <div className="links">
-                          <span className="social-summary">
-                            {safeLinkedIn(person.linkedin)
-                              ? "instagram · linkedin"
-                              : "instagram"}
-                          </span>
-                          {personNotes.length > 0 && (
-                            <span className="note-count-pill">
-                              💬 {personNotes.length}
-                            </span>
-                          )}
-                        </div>
                         <button
                           className="card-open"
                           onClick={() => openProfile(person)}
                         >
-                          view profile & leave a note ↗
+                          view profile ↗
                         </button>
+                      </div>
+                      <div className="portrait-wrap">
+                        <div
+                          className={`portrait ${person.photo ? "has-photo" : "initials-placeholder"}`}
+                          style={
+                            person.photo
+                              ? { backgroundImage: `url(${person.photo})` }
+                              : {}
+                          }
+                        >
+                          {person.photo ? "" : initials(person.name)}
+                        </div>
+                      </div>
+                      <div className="id-card-footer">
+                        <span className="id-card-barcode" aria-hidden="true" />
+                        {personNotes.length > 0 && (
+                          <span className="note-count-pill">
+                            {personNotes.length} notes
+                          </span>
+                        )}
                       </div>
                     </article>
                   );
