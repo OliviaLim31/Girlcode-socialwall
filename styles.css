@@ -127,6 +127,10 @@ body:before{
 .hero-polaroid::before{content:"";position:absolute;z-index:1;width:66px;height:23px;top:-12px;left:50%;transform:translateX(-50%) rotate(-5deg);background:rgba(228,211,232,.8);border-left:1px dashed rgba(255,255,255,.7);border-right:1px dashed rgba(255,255,255,.7)}
 .hero-polaroid-right::before{background:rgba(230,223,180,.85);transform:translateX(-50%) rotate(6deg)}
 .hero-polaroid img{display:block;width:100%;height:auto}
+.hero-polaroid-left .polaroid-open{overflow:hidden}
+.hero-polaroid-left .polaroid-open img{transform:scale(1.5);transition:transform .3s ease}
+.hero-polaroid-right .polaroid-open{overflow:hidden}
+.hero-polaroid-right .polaroid-open img{transform:translateX(-25%) scale(1.5);transition:transform .3s ease}
 .hero-polaroid figcaption{display:grid;place-items:center;min-height:45px;padding:8px 0;font:italic 17px/1.15 "Instrument Serif",serif;color:#595248}
 @media(hover:hover){.hero-polaroid:hover{transform:translateY(-5px) rotate(0deg)}}
 
