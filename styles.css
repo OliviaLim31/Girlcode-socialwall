@@ -116,6 +116,9 @@ body:before{
 
 .hero{padding:44px 12px 46px;text-align:center}
 .hero-intro{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr) minmax(0,160px);align-items:center;gap:30px;padding:12px 8px 20px}
+@media (min-width:861px){
+  .hero-intro{grid-template-columns:minmax(0,.5fr) minmax(0,1.618fr) minmax(0,.5fr)}
+}
 .hero-copy{min-width:0}
 .hero-copy h1{font-size:clamp(58px,6.6vw,80px)}
 .hero-polaroid{position:relative;margin:0;padding:10px 10px 0;background:#fffdf6;box-shadow:0 14px 24px rgba(47,49,38,.18),0 2px 4px rgba(47,49,38,.1);transform:rotate(var(--tilt));transition:transform .25s ease}
