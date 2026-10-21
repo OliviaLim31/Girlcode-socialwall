@@ -649,7 +649,7 @@ function App() {
                   <div className="hero-mascot-badge">
                     <img src="/logo.png" alt="Girl Code mascot" className="hero-mascot-img" />
                     <div className="eyebrow">
-                      girls' vibe coding · kl · 12.09.2026
+                      girls' vibe coding · kl
                     </div>
                   </div>
                   <h1>
@@ -1080,13 +1080,14 @@ function App() {
               ))}
             </div>
           </fieldset>
+          <p className="privacy-note">
+            Your profile may be visible to people who visit this wall. Without
+            a shared backend, it is saved only in this browser; with one, it is
+            saved to the shared wall.
+          </p>
           <button className="submit" type="submit">
             add me to the wall ✦
           </button>
-          <p className="micro">
-            This demo stores new cards in this browser. Connect Supabase
-            later for a shared live wall.
-          </p>
         </form>
       </AnimatedDialog>
 
@@ -1151,9 +1152,10 @@ function App() {
             </div>
             <section className="guestbook">
               <h3>leave a little note ♡</h3>
-              <p className="note-help">
-                A kind thought, an idea, or just a hello. Notes here are saved
-                only in this browser and aren't sent to this person.
+              <p className="note-help privacy-note">
+                Notes messages are saved in this browser only, not directly send to the person.
+                Other people using this browser may be able to see
+                them, so please do not include private information!!
               </p>
               <ul className="message-list" aria-live="polite">
                 {messages.filter((m) => m?.personId === activePerson.id)

@@ -190,7 +190,7 @@ export default function EventGallery({
         <div className="gallery-header-content">
           <div className="gallery-mascot-badge">
             <img src="/logo.png" alt="Girl Code mascot" className="gallery-mascot-img" />
-            <div className="eyebrow">girls' vibe coding · kl · 12.09.2026</div>
+            <div className="eyebrow">girls' vibe coding · kl</div>
           </div>
           <h1 className="gallery-title">
             our real <em>moments</em>{" "}
