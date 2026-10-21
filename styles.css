@@ -42,7 +42,7 @@ body:before{
 
 .shell{width:min(1180px,calc(100% - 28px));margin:24px auto 60px}
 .browser{
-  position:sticky;top:16px;z-index:20;
+  position:relative;
   padding:10px 16px;border:1px solid rgba(255,255,255,.48);
   background:rgba(93,106,110,.35);backdrop-filter:blur(22px);
   border-radius:28px;box-shadow:0 8px 32px rgba(47,62,65,.14);
@@ -652,7 +652,7 @@ fieldset{border:0;padding:0}
 }
 @media(max-width:620px){
   .shell{width:min(100% - 16px,1180px);margin-top:10px}
-  .browser{top:8px;border-radius:23px;padding:9px}
+  .browser{border-radius:23px;padding:9px}
   .site-brand-mascot{height:42px}
   .site-brand-wordmark{height:32px}
   .hero{padding:32px 8px 36px}
