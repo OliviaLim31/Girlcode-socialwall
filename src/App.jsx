@@ -209,6 +209,7 @@ const heroPolaroids = [
 ];
 
 function App() {
+  const authDialog = useRef(null);
   const formDialog = useRef(null);
   const detailDialog = useRef(null);
   const photoDialog = useRef(null);
@@ -263,6 +264,12 @@ function App() {
   const [query, setQuery] = useState("");
   const [selectedTone, setSelectedTone] = useState("all");
   const [toast, setToast] = useState("");
+  const [session, setSession] = useState(null);
+  const [authReady, setAuthReady] = useState(!backendEnabled);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const [messages, setMessages] = useState(() =>
     readStoredArray("girlcode-socialwall-messages"),
   );
@@ -294,7 +301,21 @@ function App() {
     setFormError("");
   };
 
+  const openSignIn = (notice = "") => {
+    setAuthError("");
+    setAuthNotice(notice);
+    authDialog.current?.showModal();
+  };
+
   const openAddForm = () => {
+    if (backendEnabled && !authReady) {
+      notify("checking your sign-in status…");
+      return;
+    }
+    if (backendEnabled && !session) {
+      openSignIn("Sign in with your email before adding a profile.");
+      return;
+    }
     dismissFormError();
     setAvatarPreview("");
     formDialog.current.showModal();
@@ -308,6 +329,102 @@ function App() {
     setToast(message);
     window.clearTimeout(notify.timer);
     notify.timer = window.setTimeout(() => setToast(""), 1800);
+  };
+
+  useEffect(() => {
+    if (!authClient) {
+      setAuthReady(true);
+      return undefined;
+    }
+
+    let active = true;
+    const {
+      data: { subscription },
+    } = authClient.auth.onAuthStateChange((event, nextSession) => {
+      setSession(nextSession);
+      setAuthReady(true);
+      if (event === "SIGNED_IN") {
+        setAuthError("");
+        setAuthNotice("");
+        authDialog.current?.close();
+      }
+    });
+
+    authClient.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) setAuthError(error.message);
+        setSession(data.session);
+        setAuthReady(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setAuthError(
+          error instanceof Error
+            ? error.message
+            : "We couldn't check your sign-in status.",
+        );
+        setAuthReady(true);
+      });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const sendSignInLink = async (event) => {
+    event.preventDefault();
+    if (!authClient) {
+      setAuthError("Email sign-in isn't configured for this site yet.");
+      return;
+    }
+
+    const email = authEmail.trim();
+    if (!email) {
+      setAuthError("Please enter your email address.");
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthError("");
+    setAuthNotice("");
+    try {
+      const { error } = await authClient.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+          shouldCreateUser: true,
+        },
+      });
+      if (error) throw error;
+      setAuthNotice("Check your inbox for a one-time sign-in link ♡");
+    } catch (error) {
+      setAuthError(
+        error instanceof Error
+          ? error.message
+          : "We couldn't send the sign-in link. Please try again.",
+      );
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    if (!authClient) return;
+    try {
+      const { error } = await authClient.auth.signOut();
+      if (error) throw error;
+      notify("you've signed out ♡");
+    } catch (error) {
+      setAuthError(
+        error instanceof Error
+          ? error.message
+          : "We couldn't sign you out. Please try again.",
+      );
+      authDialog.current?.showModal();
+    }
   };
 
   // Open Lightbox
@@ -579,6 +696,16 @@ function App() {
             )}
           </div>
 
+          {backendEnabled && (
+            <button
+              className="nav-add nav-auth"
+              type="button"
+              onClick={session ? signOut : () => openSignIn()}
+              disabled={!authReady}
+            >
+              {!authReady ? "checking…" : session ? "sign out" : "sign in"}
+            </button>
+          )}
           <button
             className="nav-add"
             onClick={activeTab === "wall" ? openAddForm : openAddMemory}
@@ -908,6 +1035,62 @@ function App() {
           </button>
         </footer>
       </main>
+
+      {/* Email Sign-In Modal */}
+      <AnimatedDialog ref={authDialog} aria-labelledby="authTitle">
+        <form className="sheet" onSubmit={sendSignInLink}>
+          <div className="sheet-head">
+            <div className="sheet-head-left">
+              <img
+                src="/logo.png"
+                alt="Girl Code logo"
+                className="sheet-dialog-logo"
+              />
+              <div>
+                <div className="tiny">welcome to the wall</div>
+                <h2 id="authTitle">sign in ♡</h2>
+              </div>
+            </div>
+            <button
+              className="close"
+              type="button"
+              onClick={() => authDialog.current?.close()}
+              aria-label="Close sign-in dialog"
+            >
+              ×
+            </button>
+          </div>
+          <p className="auth-help">
+            Enter your email and we’ll send you a one-time sign-in link. No
+            password needed.
+          </p>
+          <label>
+            <span>email address</span>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              required
+              value={authEmail}
+              onChange={(event) => setAuthEmail(event.target.value)}
+              placeholder="you@example.com"
+            />
+          </label>
+          {authNotice && (
+            <p className="auth-notice" role="status">
+              {authNotice}
+            </p>
+          )}
+          {authError && (
+            <p className="form-error" role="alert">
+              {authError}
+            </p>
+          )}
+          <button className="submit" type="submit" disabled={authLoading}>
+            {authLoading ? "sending link…" : "email me a sign-in link"}
+          </button>
+        </form>
+      </AnimatedDialog>
 
       {/* Add Profile Modal */}
       <AnimatedDialog ref={formDialog} aria-labelledby="formTitle">

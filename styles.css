@@ -617,6 +617,8 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .message-list p{margin:6px 0 0;white-space:pre-wrap;line-height:1.5}
 .message-list .empty-notes{background:none;padding:8px 0;opacity:.65}
 .form-error{color:#8b2848;font-size:13px}
+.auth-help{font-size:14px;line-height:1.6;opacity:.78}
+.auth-notice{padding:10px 12px;border-radius:12px;background:rgba(174,184,111,.18);font-size:13px;line-height:1.5}
 .close{flex-shrink:0}
 .sheet input:focus-visible,.sheet textarea:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
