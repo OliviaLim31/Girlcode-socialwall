@@ -487,15 +487,6 @@ function App() {
     setMemories((current) => [newMemory, ...current]);
   };
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      notify("page link copied ♡");
-    } catch {
-      notify("couldn't auto-copy — copy it from the address bar");
-    }
-  };
-
   const handleGoHome = (event) => {
     event?.preventDefault();
     setActiveTab("wall");
@@ -679,7 +670,7 @@ function App() {
               />
               <div className="hero-actions">
                 <button className="primary" onClick={openAddForm}>
-                  + add me
+                  + Add Me
                 </button>
                 <button
                   className="ghost"
@@ -688,11 +679,16 @@ function App() {
                     scrollTo({ top: 0, behavior: "smooth" });
                   }}
                 >
-                  view event gallery 📸
+                  Event Gallery 📸
                 </button>
-                <button className="ghost" onClick={copyLink}>
-                  copy page link
-                </button>
+                <a
+                  className="ghost hero-linkedin"
+                  href="https://www.linkedin.com/company/girlcode-kl"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Follow our LinkedIn! ↗
+                </a>
               </div>
             </section>
 
