@@ -696,22 +696,28 @@ function App() {
             )}
           </div>
 
-          {backendEnabled && (
-            <button
-              className="nav-add nav-auth"
-              type="button"
-              onClick={session ? signOut : () => openSignIn()}
-              disabled={!authReady}
-            >
-              {!authReady ? "checking…" : session ? "sign out" : "sign in"}
-            </button>
-          )}
           <button
             className="nav-add"
             onClick={activeTab === "wall" ? openAddForm : openAddMemory}
           >
             {activeTab === "wall" ? "+ add me" : "+ share memory"}
           </button>
+          {backendEnabled && (
+            <button
+              className={`nav-add nav-auth${session ? " is-signed-in" : ""}`}
+              type="button"
+              onClick={session ? signOut : () => openSignIn()}
+              disabled={!authReady}
+              aria-label={
+                session
+                  ? "Signed in. Click to sign out."
+                  : "Sign in"
+              }
+              title={session ? "Click to sign out" : undefined}
+            >
+              {!authReady ? "checking…" : session ? "signed in" : "sign in"}
+            </button>
+          )}
         </header>
 
         {activeTab === "wall" ? (

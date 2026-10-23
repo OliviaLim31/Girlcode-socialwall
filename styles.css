@@ -110,6 +110,8 @@ body:before{
   background:rgba(255,255,255,.24);color:white;font-weight:600;white-space:nowrap;
 }
 .nav-add:hover{background:rgba(255,255,255,.38)}
+.nav-auth.is-signed-in{background:rgba(218,239,219,.76);border-color:rgba(239,255,239,.82);color:#38543c}
+.nav-auth.is-signed-in:hover{background:rgba(218,239,219,.92)}
 
 .view-container{width:100%}
 .view-fade-in{animation:enter-soft .45s cubic-bezier(.2,.8,.2,1) backwards}
