@@ -6,25 +6,28 @@ A one-page social wall for the Girls' Vibe Coding session.
 - Responsive dreamy Y2K / editorial social wall
 - Instagram username → clickable Instagram profile
 - Optional LinkedIn link
-- Optional profile photo upload (compressed before local storage)
-- Add-me modal
+- Optional profile photo upload in local-only mode (compressed before storage)
+- Email magic-link sign-in with Supabase
+- Public profiles loaded from Supabase; signed-in users can create one profile per account
+- Song title and artist saved with shared profiles
 - Search by name, handle, or interests
-- Functional close, add, copy-link, home, refresh, back and forward controls
+- Functional close, add, home, refresh, back and forward controls
 - Mobile-friendly layout
-- Browser-local persistence via `localStorage`
+- Browser-local persistence for guestbook notes, memories, and local-only profiles
 - Compact cards (four desktop columns, two mobile columns); click anywhere on a card to open its profile
 - Profile dialog with Instagram and optional LinkedIn links
 - Per-profile guestbook with required author name and message, saved in this browser only
 
 ## Important
-This version is intentionally backend-free so it works instantly. Profiles added on one device are stored only in that browser.
+Supabase mode is enabled by creating a local `config.js` from `config.example.js` and filling in the project URL and publishable key. Never put a Supabase secret or service-role key in browser code.
 
-Guestbook notes also stay in this browser: they are not delivered to the profile owner or shared across devices. Names on notes are self-reported, not verified identities. The included seed profiles have no LinkedIn URLs; their details show “not provided” until real URLs are supplied. Profile editing and ownership verification are not implemented yet.
+The Supabase `profiles` table must be available through the Data API and have RLS policies that allow public reads of active profiles and authenticated owners to create their own profile. The app expects these columns: `id`, `owner_id`, `name`, `instagram`, `linkedin`, `about`, `tone`, `photo_url`, `song_title`, `song_artist`, `deleted_at`, and `created_at`. A unique index on `owner_id` enforces one profile per account.
 
-For a shared live wall across everyone's phones, connect Supabase (profiles table + avatar storage) and deploy to Vercel/Netlify.
+Profile editing, soft deletion, shared guestbook messages, and Supabase Storage photo uploads are not connected yet. In Supabase mode, the profile photo control is intentionally disabled until shared storage is configured. Guestbook notes, memories, and reactions remain browser-local. The included seed profiles are display examples; they are not rows owned by Supabase accounts.
 
 ## Run locally
 ```bash
-python3 -m http.server 8080
+npm install
+npm run dev
 ```
-Then open `http://localhost:8080`.
+Then open the local URL printed by Vite (usually `http://localhost:5173`).

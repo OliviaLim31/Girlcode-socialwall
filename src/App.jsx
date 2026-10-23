@@ -185,6 +185,48 @@ async function createProfileOnBackend(person) {
   return result.data;
 }
 
+function profileFromRow(row) {
+  return {
+    id: row.id,
+    ownerId: row.owner_id,
+    name: row.name,
+    ig: row.instagram,
+    linkedin: row.linkedin || "",
+    about: row.about || "",
+    tone: row.tone || "rose",
+    photo: row.photo_url || "",
+    song: row.song_title
+      ? {
+          title: row.song_title,
+          artist: row.song_artist || "",
+          raw: [row.song_title, row.song_artist].filter(Boolean).join(" "),
+        }
+      : null,
+    deletedAt: row.deleted_at,
+  };
+}
+
+async function insertProfileRow(person, ownerId) {
+  const { data, error } = await authClient
+    .from("profiles")
+    .insert({
+      owner_id: ownerId,
+      name: person.name,
+      instagram: person.ig,
+      linkedin: person.linkedin || null,
+      about: person.about || null,
+      tone: person.tone,
+      song_title: person.song?.title || null,
+      song_artist: person.song?.artist || null,
+    })
+    .select(
+      "id, owner_id, name, instagram, linkedin, about, tone, photo_url, song_title, song_artist, deleted_at, created_at",
+    )
+    .single();
+  if (error) throw error;
+  return profileFromRow(data);
+}
+
 const heroPolaroids = [
   {
     id: "hero-1",
@@ -222,7 +264,9 @@ function App() {
   // People State
   const [people, setPeople] = useState(() => {
     try {
-      const stored = readStoredArray("girlcode-socialwall-people");
+      const stored = backendEnabled
+        ? []
+        : readStoredArray("girlcode-socialwall-people");
       return [
         ...initialProfiles,
         ...stored
@@ -266,6 +310,9 @@ function App() {
   const [toast, setToast] = useState("");
   const [session, setSession] = useState(null);
   const [authReady, setAuthReady] = useState(!backendEnabled);
+  const [profilesLoading, setProfilesLoading] = useState(backendEnabled);
+  const [profileLoadError, setProfileLoadError] = useState("");
+  const [ownedProfile, setOwnedProfile] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
   const [authNotice, setAuthNotice] = useState("");
   const [authError, setAuthError] = useState("");
@@ -314,6 +361,20 @@ function App() {
     }
     if (backendEnabled && !session) {
       openSignIn("Sign in with your email before adding a profile.");
+      return;
+    }
+    if (backendEnabled && profilesLoading) {
+      notify("loading profiles…");
+      return;
+    }
+    if (backendEnabled && ownedProfile) {
+      if (ownedProfile.deletedAt) {
+        notify("your profile is archived; please contact the wall admin.");
+        return;
+      }
+      setActivePerson(ownedProfile);
+      detailDialog.current.showModal();
+      notify("you already have a profile card ♡");
       return;
     }
     dismissFormError();
@@ -373,6 +434,58 @@ function App() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!backendEnabled || !authReady) return undefined;
+
+    let active = true;
+    const loadProfiles = async () => {
+      setProfilesLoading(true);
+      setProfileLoadError("");
+      try {
+        const { data, error } = await authClient
+          .from("profiles")
+          .select(
+            "id, owner_id, name, instagram, linkedin, about, tone, photo_url, song_title, song_artist, deleted_at, created_at",
+          )
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        if (!active) return;
+
+        const rows = data || [];
+        const ownRow = rows.find(
+          (row) => row.owner_id === session?.user?.id,
+        );
+        setOwnedProfile(ownRow ? profileFromRow(ownRow) : null);
+        setPeople([
+          ...initialProfiles,
+          ...rows
+            .filter((row) => !row.deleted_at)
+            .map(profileFromRow),
+        ]);
+      } catch (error) {
+        if (!active) return;
+        const detail =
+          error instanceof Error
+            ? error.message
+            : typeof error?.message === "string"
+              ? error.message
+              : "";
+        setProfileLoadError(
+          detail
+            ? `Could not load shared profiles: ${detail}`
+            : "Could not load shared profiles. Please check the Supabase API settings.",
+        );
+      } finally {
+        if (active) setProfilesLoading(false);
+      }
+    };
+
+    loadProfiles();
+    return () => {
+      active = false;
+    };
+  }, [authReady, session?.user?.id]);
 
   const sendSignInLink = async (event) => {
     event.preventDefault();
@@ -528,19 +641,19 @@ function App() {
       return showFormError(
         "Please enter a valid LinkedIn profile link starting with https://.",
       );
+    if (backendEnabled && file?.size)
+      return showFormError(
+        "Shared photo uploads aren't ready yet. Please add your photo after that feature is connected.",
+      );
     try {
-      if (file?.size) person.photo = await compressImage(file);
+      let savedPerson = person;
       if (backendEnabled) {
-        const saved = await createProfileOnBackend(person);
-        Object.assign(person, {
-          id: saved.id,
-          ig: saved.instagram,
-          linkedin: saved.linkedin || "",
-          about: saved.about || "",
-          tone: saved.tone,
-          photo: "",
-        });
+        if (!session?.user?.id)
+          throw new Error("Please sign in before adding a profile.");
+        savedPerson = await insertProfileRow(person, session.user.id);
+        setOwnedProfile(savedPerson);
       } else {
+        if (file?.size) person.photo = await compressImage(file);
         const saved = readStoredArray("girlcode-socialwall-people");
         saved.push(person);
         localStorage.setItem(
@@ -548,7 +661,7 @@ function App() {
           JSON.stringify(saved),
         );
       }
-      setPeople((current) => [...current, person]);
+      setPeople((current) => [...current, savedPerson]);
       setQuery("");
       setAvatarPreview("");
       dismissFormError();
@@ -969,6 +1082,13 @@ function App() {
               </section>
             )}
 
+            {profileLoadError && (
+              <p className="profile-load-error" role="alert">
+                {profileLoadError} The sample cards are still shown; shared
+                profiles may be missing until the API is enabled.
+              </p>
+            )}
+
             <section
               className="music-gallery"
               aria-labelledby="musicGalleryTitle"
@@ -1196,10 +1316,18 @@ function App() {
                   accept="image/*"
                   className="visually-hidden-file"
                   onChange={handleAvatarChange}
+                  disabled={backendEnabled}
                 />
                 <div className="avatar-btns-group">
-                  <label htmlFor="profile-avatar-input" className="avatar-pick-btn">
-                    {avatarPreview ? "change photo" : "choose photo"}
+                  <label
+                    htmlFor="profile-avatar-input"
+                    className={`avatar-pick-btn${backendEnabled ? " is-disabled" : ""}`}
+                  >
+                    {backendEnabled
+                      ? "shared photo upload coming soon"
+                      : avatarPreview
+                        ? "change photo"
+                        : "choose photo"}
                   </label>
                   {avatarPreview && (
                     <button
@@ -1215,7 +1343,11 @@ function App() {
                     </button>
                   )}
                 </div>
-                <small className="avatar-note">looks best in square crop ♡</small>
+                <small className="avatar-note">
+                  {backendEnabled
+                    ? "You can add a shared profile photo in a later step."
+                    : "looks best in square crop ♡"}
+                </small>
               </div>
             </div>
           </div>
@@ -1236,9 +1368,8 @@ function App() {
             </div>
           </fieldset>
           <p className="privacy-note">
-            Your profile may be visible to people who visit this wall. Without
-            a shared backend, it is saved only in this browser; with one, it is
-            saved to the shared wall.
+            Your profile details and song will be visible to people who visit
+            this wall. Please do not include private information.
           </p>
           <button className="submit" type="submit">
             add me to the wall ✦
