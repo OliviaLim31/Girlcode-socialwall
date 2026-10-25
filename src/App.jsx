@@ -314,6 +314,7 @@ function App() {
   const [profileLoadError, setProfileLoadError] = useState("");
   const [ownedProfile, setOwnedProfile] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
+  const [authSuccessEmail, setAuthSuccessEmail] = useState("");
   const [authNotice, setAuthNotice] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
@@ -351,6 +352,7 @@ function App() {
   const openSignIn = (notice = "") => {
     setAuthError("");
     setAuthNotice(notice);
+    setAuthSuccessEmail("");
     authDialog.current?.showModal();
   };
 
@@ -512,7 +514,9 @@ function App() {
         },
       });
       if (error) throw error;
-      setAuthNotice("Check your inbox for a one-time sign-in link ♡");
+      setAuthSuccessEmail(email);
+      setAuthNotice("");
+      notify("Sign-in link sent to your email ♡");
     } catch (error) {
       setAuthError(
         error instanceof Error
@@ -1163,59 +1167,126 @@ function App() {
       </main>
 
       {/* Email Sign-In Modal */}
-      <AnimatedDialog ref={authDialog} aria-labelledby="authTitle">
-        <form className="sheet" onSubmit={sendSignInLink}>
-          <div className="sheet-head">
-            <div className="sheet-head-left">
-              <img
-                src="/logo.png"
-                alt="Girl Code logo"
-                className="sheet-dialog-logo"
-              />
-              <div>
-                <div className="tiny">welcome to the wall</div>
-                <h2 id="authTitle">sign in ♡</h2>
+      <AnimatedDialog
+        ref={authDialog}
+        aria-labelledby="authTitle"
+        onClose={() => setAuthSuccessEmail("")}
+      >
+        {authSuccessEmail ? (
+          <div className="sheet auth-success-sheet">
+            <div className="sheet-head">
+              <div className="sheet-head-left">
+                <img
+                  src="/logo.png"
+                  alt="Girl Code logo"
+                  className="sheet-dialog-logo"
+                />
+                <div>
+                  <div className="tiny">check your inbox</div>
+                  <h2 id="authTitle">magic link sent ♡</h2>
+                </div>
+              </div>
+              <button
+                className="close"
+                type="button"
+                onClick={() => {
+                  authDialog.current?.close();
+                  setAuthSuccessEmail("");
+                }}
+                aria-label="Close dialog"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="auth-success-body">
+              <div className="auth-success-badge" aria-hidden="true">
+                <span className="auth-success-badge-icon">💌</span>
+              </div>
+              <p className="auth-success-desc">
+                We sent a one-time sign-in link to:
+              </p>
+              <div className="auth-success-email">
+                <span>{authSuccessEmail}</span>
+              </div>
+              <p className="auth-success-tip">
+                Click the link in your email to sign in directly on this device. If you don’t see it in a moment, remember to check your spam folder!
+              </p>
+              <div className="auth-success-actions">
+                <button
+                  type="button"
+                  className="submit auth-success-done"
+                  onClick={() => {
+                    authDialog.current?.close();
+                    setAuthSuccessEmail("");
+                  }}
+                >
+                  got it ✦
+                </button>
+                <button
+                  type="button"
+                  className="auth-retry-btn"
+                  onClick={() => setAuthSuccessEmail("")}
+                >
+                  ← use another email
+                </button>
               </div>
             </div>
-            <button
-              className="close"
-              type="button"
-              onClick={() => authDialog.current?.close()}
-              aria-label="Close sign-in dialog"
-            >
-              ×
-            </button>
           </div>
-          <p className="auth-help">
-            Enter your email and we’ll send you a one-time sign-in link. No
-            password needed.
-          </p>
-          <label>
-            <span>email address</span>
-            <input
-              type="email"
-              name="email"
-              autoComplete="email"
-              required
-              value={authEmail}
-              onChange={(event) => setAuthEmail(event.target.value)}
-              placeholder="you@example.com"
-            />
-          </label>
-          {authNotice && (
-            <p className="auth-notice" role="status">
-              {authNotice}
+        ) : (
+          <form className="sheet" onSubmit={sendSignInLink}>
+            <div className="sheet-head">
+              <div className="sheet-head-left">
+                <img
+                  src="/logo.png"
+                  alt="Girl Code logo"
+                  className="sheet-dialog-logo"
+                />
+                <div>
+                  <div className="tiny">welcome to the wall</div>
+                  <h2 id="authTitle">sign in ♡</h2>
+                </div>
+              </div>
+              <button
+                className="close"
+                type="button"
+                onClick={() => authDialog.current?.close()}
+                aria-label="Close sign-in dialog"
+              >
+                ×
+              </button>
+            </div>
+            <p className="auth-help">
+              Enter your email and we’ll send you a one-time sign-in link. No
+              password needed.
             </p>
-          )}
-          {authError && (
-            <p className="form-error" role="alert">
-              {authError}
-            </p>
-          )}
-          <button className="submit" type="submit" disabled={authLoading}>
-            {authLoading ? "sending link…" : "email me a sign-in link"}
-          </button>
-        </form>
+            <label>
+              <span>email address</span>
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                required
+                value={authEmail}
+                onChange={(event) => setAuthEmail(event.target.value)}
+                placeholder="you@example.com"
+              />
+            </label>
+            {authNotice && (
+              <p className="auth-notice" role="status">
+                {authNotice}
+              </p>
+            )}
+            {authError && (
+              <p className="form-error" role="alert">
+                {authError}
+              </p>
+            )}
+            <button className="submit" type="submit" disabled={authLoading}>
+              {authLoading ? "sending link…" : "email me a sign-in link"}
+            </button>
+          </form>
+        )}
       </AnimatedDialog>
 
       {/* Add Profile Modal */}

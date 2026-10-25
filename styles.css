@@ -631,6 +631,85 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .form-error{color:#8b2848;font-size:13px}
 .auth-help{font-size:14px;line-height:1.6;opacity:.78}
 .auth-notice{padding:10px 12px;border-radius:12px;background:rgba(174,184,111,.18);font-size:13px;line-height:1.5}
+.auth-success-body{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:12px 4px 6px;
+  animation:enter-soft .35s cubic-bezier(.2,.8,.2,1) both;
+}
+.auth-success-badge{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(207,169,218,.35),rgba(216,146,170,.25));
+  border:2px solid rgba(255,255,255,.9);
+  display:grid;
+  place-items:center;
+  box-shadow:0 8px 24px rgba(157,127,194,.22);
+  margin-bottom:14px;
+  animation:form-alert-pop .4s cubic-bezier(.2,1.4,.45,1) both;
+}
+.auth-success-badge-icon{
+  font-size:30px;
+}
+.auth-success-desc{
+  margin:0;
+  font-size:14px;
+  opacity:.82;
+  line-height:1.5;
+}
+.auth-success-email{
+  margin:10px 0 14px;
+  padding:8px 18px;
+  border-radius:999px;
+  background:rgba(255,255,255,.75);
+  border:1px solid rgba(35,35,31,.16);
+  box-shadow:0 3px 10px rgba(35,35,31,.06);
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:.02em;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.auth-success-tip{
+  margin:0 0 20px;
+  font-size:12px;
+  line-height:1.6;
+  opacity:.72;
+  max-width:390px;
+}
+.auth-success-actions{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  width:100%;
+}
+.auth-success-done{
+  width:100%;
+  margin:0;
+}
+.auth-retry-btn{
+  background:transparent;
+  border:none;
+  color:var(--ink);
+  font-size:12px;
+  font-weight:600;
+  opacity:.72;
+  padding:6px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:opacity .2s ease, transform .2s ease;
+}
+.auth-retry-btn:hover{
+  opacity:1;
+  text-decoration:underline;
+}
 .close{flex-shrink:0}
 .sheet input:focus-visible,.sheet textarea:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
