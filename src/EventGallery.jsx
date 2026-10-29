@@ -53,22 +53,10 @@ export const defaultMemories = [
     tilt: "-2.4deg",
     tapeColor: "rgba(209, 226, 239, 0.85)",
   },
-  {
-    id: "mem-collab",
-    src: "/events/12.09.2026/event-collab.jpg",
-    title: "Pair Coding Flow State",
-    caption: "Two heads are better than one! Tackling CSS, logic, and animations side-by-side.",
-    tag: "Coding & Vibe",
-    eventDate: "12.09.2026",
-    date: "12.09.2026",
-    author: "Edwina",
-    baseLikes: 39,
-    tilt: "1.6deg",
-    tapeColor: "rgba(228, 211, 232, 0.85)",
-  },
+
   {
     id: "mem-table",
-    src: "/events/12.09.2026/event-table.jpg",
+    src: "/events/12.09.2026/group-front-peace.jpg",
     title: "Matcha, Laptops & Warmth",
     caption: "Iced matcha, French fries, laptops, and good company under the warm cafe lighting.",
     tag: "Coffee & Hangout",
@@ -93,7 +81,7 @@ export const defaultMemories = [
     tapeColor: "rgba(224, 235, 200, 0.85)",
   },
   ...[
-    ["group-front-peace.jpg", "Peace Signs, Full Hearts", "Front row smiles, back row peace signs. Everyone in one frame.", "Group Love", "Girls in KL", 47],
+    ["event-table.jpg", "Peace Signs, Full Hearts", "Front row smiles, back row peace signs. Everyone in one frame.", "Group Love", "Girls in KL", 47],
     ["group-loft-2.jpg", "Loft Crew ♡", "Another angle of the whole crew gathered around the long table.", "Group Love", "Girls in KL", 44],
     ["illustration-loft.jpg", "Our Group, Illustrated", "The loft group photo turned into a soft watercolor keepsake.", "Group Love", "Hana", 61],
     ["illustration-crew.jpg", "Little Watercolor Crew", "Every girl in the room, hand-painted style. Frame-worthy.", "Group Love", "Hana", 66],
