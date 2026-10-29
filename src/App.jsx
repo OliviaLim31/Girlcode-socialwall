@@ -5,6 +5,7 @@ import AnimatedDialog from "./AnimatedDialog";
 import EventGallery, { defaultMemories } from "./EventGallery";
 import AddMemoryModal from "./AddMemoryModal";
 import Lightbox from "./Lightbox";
+import Avatar from "./Avatar";
 
 const seed = [
   {
@@ -13,7 +14,6 @@ const seed = [
     about: "creative tech · skating · random side quests",
     tone: "rose",
     linkedin: "https://www.linkedin.com/in/olivialimyunxuan/",
-    photo: "/images/GC%20Group.jpg",
   },
   {
     name: "Edwina",
@@ -76,15 +76,6 @@ function readStoredArray(key) {
   } catch {
     return [];
   }
-}
-
-function initials(name = "") {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0] || "")
-    .join("")
-    .toUpperCase();
 }
 
 function cleanIg(value = "") {
@@ -325,6 +316,8 @@ function App() {
   const [formError, setFormError] = useState("");
   const [formErrorKey, setFormErrorKey] = useState(0);
   const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarName, setAvatarName] = useState("");
+  const [avatarTone, setAvatarTone] = useState("rose");
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
@@ -381,6 +374,8 @@ function App() {
     }
     dismissFormError();
     setAvatarPreview("");
+    setAvatarName("");
+    setAvatarTone("rose");
     formDialog.current.showModal();
   };
 
@@ -668,6 +663,8 @@ function App() {
       setPeople((current) => [...current, savedPerson]);
       setQuery("");
       setAvatarPreview("");
+      setAvatarName("");
+      setAvatarTone("rose");
       dismissFormError();
       form.reset();
       formDialog.current.close();
@@ -1061,16 +1058,12 @@ function App() {
                         </button>
                       </div>
                       <div className="portrait-wrap">
-                        <div
-                          className={`portrait ${person.photo ? "has-photo" : "initials-placeholder"}`}
-                          style={
-                            person.photo
-                              ? { backgroundImage: `url(${person.photo})` }
-                              : {}
-                          }
-                        >
-                          {person.photo ? "" : initials(person.name)}
-                        </div>
+                        <Avatar
+                          className="portrait"
+                          name={person.name}
+                          tone={person.tone}
+                          photo={person.photo}
+                        />
                       </div>
                       <div className="id-card-footer">
                         <span className="id-card-barcode" aria-hidden="true" />
@@ -1326,7 +1319,14 @@ function App() {
           </div>
           <label>
             <span>name</span>
-            <input name="name" required maxLength="40" placeholder="Olivia" />
+            <input
+              name="name"
+              required
+              maxLength="40"
+              placeholder="Olivia"
+              value={avatarName}
+              onChange={(event) => setAvatarName(event.target.value)}
+            />
           </label>
           <label>
             <span>instagram username</span>
@@ -1369,16 +1369,12 @@ function App() {
               profile photo <i>optional</i>
             </span>
             <div className="avatar-upload-row">
-              <div
+              <Avatar
                 className="avatar-live-preview"
-                style={
-                  avatarPreview
-                    ? { backgroundImage: `url(${avatarPreview})` }
-                    : {}
-                }
-              >
-                {!avatarPreview && <span className="avatar-placeholder-star">✦</span>}
-              </div>
+                name={avatarName || "Your name"}
+                tone={avatarTone}
+                photo={avatarPreview}
+              />
               <div className="avatar-upload-actions">
                 <input
                   name="photo"
@@ -1425,13 +1421,14 @@ function App() {
           <fieldset>
             <legend>pick a card vibe</legend>
             <div className="swatches">
-              {tones.map((tone, index) => (
+              {tones.map((tone) => (
                 <label key={tone}>
                   <input
                     type="radio"
                     name="tone"
                     value={tone}
-                    defaultChecked={index === 0}
+                    checked={avatarTone === tone}
+                    onChange={() => setAvatarTone(tone)}
                   />
                   <span className={`swatch ${tone}`} />
                 </label>
@@ -1468,16 +1465,12 @@ function App() {
               </button>
             </div>
             <div className={`detail-profile ${activePerson.tone || "rose"}`}>
-              <div
+              <Avatar
                 className="detail-portrait portrait"
-                style={
-                  activePerson.photo
-                    ? { backgroundImage: `url(${activePerson.photo})` }
-                    : {}
-                }
-              >
-                {activePerson.photo ? "" : initials(activePerson.name)}
-              </div>
+                name={activePerson.name}
+                tone={activePerson.tone}
+                photo={activePerson.photo}
+              />
               <div className="detail-copy">
                 <span className="detail-field-label">NAME</span>
                 <h2 id="detailName">{activePerson.name}</h2>
