@@ -197,7 +197,7 @@ button{font:inherit;cursor:pointer}
   display:flex;justify-content:space-between;align-items:end;gap:18px;
   margin:8px 0 22px;padding:0 4px;flex-wrap:wrap;
 }
-.wall-heading{display:flex;align-items:center;gap:18px}
+.wall-heading{display:flex;align-items:flex-end;gap:18px}
 .wall-add-button{padding:10px 16px;white-space:nowrap}
 .count{font:400 31px/1.1 "Instrument Serif",serif;margin-top:5px}
 
