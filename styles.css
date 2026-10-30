@@ -887,3 +887,16 @@ dialog[data-closing]::backdrop{animation:backdrop-out .18s ease both}
 .polaroid-open{display:block;position:relative;width:100%;padding:0;border:0;background:transparent;cursor:zoom-in}
 .photo-zoom-hint{position:absolute;bottom:8px;left:50%;translate:-50% 0;white-space:nowrap;padding:5px 9px;border-radius:999px;background:rgba(35,35,31,.75);color:white;font-size:10px;opacity:0;transition:opacity .2s ease}
 .polaroid-open:hover .photo-zoom-hint,.polaroid-open:focus-visible .photo-zoom-hint{opacity:1}
+
+/* mobile hero: text on top, polaroids side by side below */
+@media(max-width:860px){
+  .hero-intro{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 14px}
+  .hero-copy{grid-column:1/-1;grid-row:1}
+  .hero-polaroid-left,.hero-polaroid-right{grid-row:2;margin-top:8px;max-width:220px;width:100%}
+  .hero-polaroid-left{justify-self:end}
+  .hero-polaroid-right{justify-self:start}
+  .hero-polaroid figcaption{font-size:14px;min-height:38px}
+}
+@media(max-width:620px){
+  .hero-copy h1{font-size:clamp(44px,13vw,58px)}
+}
