@@ -1387,7 +1387,7 @@ function App() {
               name="name"
               required
               maxLength="40"
-              placeholder="Olivia"
+              placeholder="Your name"
               value={avatarName}
               onChange={(event) => setAvatarName(event.target.value)}
             />
@@ -1400,7 +1400,7 @@ function App() {
                 name="instagram"
                 required
                 maxLength="60"
-                placeholder="olivia.lim31"
+                placeholder="your.instagram"
               />
             </div>
           </label>

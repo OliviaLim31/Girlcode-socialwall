@@ -218,7 +218,7 @@ export default function AddMemoryModal({
             name="author"
             required
             maxLength="40"
-            placeholder="e.g. Olivia or @olivia.lim31"
+            placeholder="Your name or @yourusername"
           />
         </label>
 
