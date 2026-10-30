@@ -4,3 +4,5 @@
 .text-loop__text{fill:var(--loop-color);font-family:"DM Sans",sans-serif;font-size:var(--loop-size);font-weight:var(--loop-weight);letter-spacing:var(--loop-spacing);dominant-baseline:middle;paint-order:stroke;stroke:rgba(74,14,98,.12);stroke-width:1px}
 .text-loop__text--uppercase{text-transform:uppercase}
 @media (max-width:760px){.text-loop{height:132px;margin-top:12px}.text-loop__text{font-size:30px}.text-loop__ribbon{stroke-width:52px}}
+/* keep the 1440x180 aspect on mobile (132px tall → 1056px wide), crop the sides */
+@media (max-width:760px){.text-loop__svg{width:1056px;max-width:none;margin-left:calc(50% - 528px)}}
