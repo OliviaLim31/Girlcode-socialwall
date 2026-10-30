@@ -14,8 +14,20 @@ export const AVATAR_STYLES = [
   { id: "heart-clip", label: "Sparkles" },
 ];
 
+export const SKIN_TONES = [
+  { id: "very-fair", label: "Very fair" },
+  { id: "fair", label: "Fair" },
+  { id: "wheat", label: "Wheat" },
+  { id: "chocolate", label: "Chocolate" },
+];
+
 const hairColors = ["#47343a", "#29272b", "#805844", "#b17a50", "#5a4653"];
-const skinColors = ["#f4cfbd", "#dfb39b", "#f7dccd", "#d39e85", "#edc3aa"];
+const skinColors = {
+  "very-fair": "#fff0e8",
+  fair: "#f4cfbd",
+  wheat: "#c98e65",
+  chocolate: "#75452f",
+};
 const eyeColors = ["#66526b", "#567b83", "#755c55", "#66749a", "#806a50"];
 const ink = "#382c31";
 const avatarStyleDetails = {
@@ -39,6 +51,7 @@ export default function Avatar({
   name = "Your name",
   tone = "rose",
   avatarStyle = "star-bob",
+  skinTone = "fair",
   photo = "",
   className = "",
 }) {
@@ -46,11 +59,11 @@ export default function Avatar({
     return <img className={`${className} portrait-photo`} src={photo} alt="" />;
   }
 
-  const seed = hashSeed(`${name}-${tone}`);
+  const seed = hashSeed(`${name}-${tone}-${avatarStyle}-${skinTone}`);
   const [background, accent, deepAccent, outfit] =
     palettes[tone] || palettes.rose;
   const hair = hairColors[seed % hairColors.length];
-  const skin = skinColors[(seed >>> 3) % skinColors.length];
+  const skin = skinColors[skinTone] || skinColors.fair;
   const eyes = eyeColors[(seed >>> 5) % eyeColors.length];
   const style = avatarStyleDetails[avatarStyle] || avatarStyleDetails["star-bob"];
   const hairstyle = style.hairstyle;

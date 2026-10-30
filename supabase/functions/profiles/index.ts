@@ -12,6 +12,7 @@ const avatarStyles = [
   "side-pony",
   "heart-clip",
 ];
+const skinTones = ["very-fair", "fair", "wheat", "chocolate"];
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const publishableKey =
@@ -35,7 +36,7 @@ Deno.serve(async (request) => {
       let query = client
         .from("profiles")
         .select(
-          "id, name, instagram, linkedin, about, tone, avatar_style, photo_url, owner_id, created_at",
+          "id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, owner_id, created_at",
         )
         .order("created_at", { ascending: true });
 
@@ -68,6 +69,8 @@ Deno.serve(async (request) => {
       const tone = typeof body.tone === "string" ? body.tone : "rose";
       const avatarStyle =
         typeof body.avatar_style === "string" ? body.avatar_style : "star-bob";
+      const skinTone =
+        typeof body.skin_tone === "string" ? body.skin_tone : "fair";
 
       if (!name || name.length > 40 || !/^[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
         return json({ error: "Name or Instagram username is invalid." }, 422);
@@ -77,6 +80,9 @@ Deno.serve(async (request) => {
       }
       if (!avatarStyles.includes(avatarStyle)) {
         return json({ error: "Avatar style is invalid." }, 422);
+      }
+      if (!skinTones.includes(skinTone)) {
+        return json({ error: "Skin tone is invalid." }, 422);
       }
 
       const { data, error } = await userClient
@@ -89,9 +95,10 @@ Deno.serve(async (request) => {
           about,
           tone,
           avatar_style: avatarStyle,
+          skin_tone: skinTone,
         })
         .select(
-          "id, name, instagram, linkedin, about, tone, avatar_style, photo_url, owner_id, created_at",
+          "id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, owner_id, created_at",
         )
         .single();
 

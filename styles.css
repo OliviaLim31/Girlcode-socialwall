@@ -750,6 +750,21 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
 .avatar-option:focus-within{outline:2px solid var(--ink);outline-offset:2px}
 .avatar-option-image{width:48px;height:48px;overflow:hidden;border-radius:50%;box-shadow:0 2px 6px rgba(35,35,31,.1)}
 .avatar-option-image .portrait-art{border-radius:inherit}
+.skin-tone-picker{margin-top:14px}
+.skin-tone-picker legend{font-size:12px;font-weight:600;margin-bottom:8px}
+.skin-tone-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.skin-tone-option{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-width:0;padding:7px 3px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(255,255,255,.55);font-size:10px;text-align:center;cursor:pointer;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease;
+}
+.skin-tone-option:hover{transform:translateY(-2px);background:#fff}
+.skin-tone-option.selected{border-color:#7560b3;background:#f5f0ff;box-shadow:0 0 0 2px rgba(117,96,179,.16)}
+.skin-tone-option input{position:absolute;width:1px;height:1px;opacity:0}
+.skin-tone-option:focus-within{outline:2px solid var(--ink);outline-offset:2px}
+.skin-tone-preview{width:42px;height:42px;overflow:hidden;border-radius:50%;box-shadow:0 2px 6px rgba(35,35,31,.1)}
+.skin-tone-preview .portrait-art{border-radius:inherit}
 .avatar-upload-actions{display:flex;flex-direction:column;gap:5px;flex:1}
 .visually-hidden-file{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .avatar-btns-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -795,6 +810,9 @@ fieldset{border:0;padding:0}
   .avatar-picker-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
   .avatar-option{padding:6px 2px;font-size:9px}
   .avatar-option-image{width:42px;height:42px}
+  .skin-tone-options{gap:5px}
+  .skin-tone-option{padding:6px 2px;font-size:9px}
+  .skin-tone-preview{width:38px;height:38px}
   .site-nav{
     display:grid;grid-template-columns:1fr auto;row-gap:10px;
   }

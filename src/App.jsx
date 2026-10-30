@@ -5,7 +5,7 @@ import AnimatedDialog from "./AnimatedDialog";
 import EventGallery, { defaultMemories } from "./EventGallery";
 import AddMemoryModal from "./AddMemoryModal";
 import Lightbox from "./Lightbox";
-import Avatar, { AVATAR_STYLES } from "./Avatar";
+import Avatar, { AVATAR_STYLES, SKIN_TONES } from "./Avatar";
 
 const seed = [
   {
@@ -54,6 +54,7 @@ const seedProfiles = seed.map((profile, index) => ({
   ...profile,
   id: `seed-${index}`,
   avatarStyle: AVATAR_STYLES[index % AVATAR_STYLES.length].id,
+  skinTone: SKIN_TONES[index % SKIN_TONES.length].id,
 }));
 
 const initialProfiles = [
@@ -172,6 +173,7 @@ async function createProfileOnBackend(person) {
       about: person.about || null,
       tone: person.tone,
       avatar_style: person.avatarStyle,
+      skin_tone: person.skinTone,
     }),
   });
   const result = await response.json().catch(() => ({}));
@@ -192,6 +194,7 @@ function profileFromRow(row) {
     about: row.about || "",
     tone: row.tone || "rose",
     avatarStyle: row.avatar_style || "star-bob",
+    skinTone: row.skin_tone || "fair",
     photo: row.photo_url || "",
     song: row.song_title
       ? {
@@ -215,11 +218,12 @@ async function insertProfileRow(person, ownerId) {
       about: person.about || null,
       tone: person.tone,
       avatar_style: person.avatarStyle,
+      skin_tone: person.skinTone,
       song_title: person.song?.title || null,
       song_artist: person.song?.artist || null,
     })
     .select(
-      "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, photo_url, song_title, song_artist, deleted_at, created_at",
+      "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, deleted_at, created_at",
     )
     .single();
   if (error) throw error;
@@ -370,6 +374,7 @@ function App() {
   const [avatarName, setAvatarName] = useState("");
   const [avatarTone, setAvatarTone] = useState("rose");
   const [avatarStyle, setAvatarStyle] = useState("star-bob");
+  const [avatarSkinTone, setAvatarSkinTone] = useState("fair");
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
@@ -429,7 +434,7 @@ function App() {
     setAvatarName("");
     setAvatarTone("rose");
     setAvatarStyle("star-bob");
-    setAvatarStyle("star-bob");
+    setAvatarSkinTone("fair");
     formDialog.current.showModal();
   };
 
@@ -497,7 +502,7 @@ function App() {
         const { data, error } = await authClient
           .from("profiles")
           .select(
-            "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, photo_url, song_title, song_artist, deleted_at, created_at",
+            "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, deleted_at, created_at",
           )
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -683,6 +688,7 @@ function App() {
         about: data.get("about").trim(),
         tone: data.get("tone") || "rose",
         avatarStyle: data.get("avatarStyle") || "star-bob",
+        skinTone: data.get("skinTone") || "fair",
         song,
         photo: "",
       };
@@ -720,6 +726,8 @@ function App() {
       setAvatarPreview("");
       setAvatarName("");
       setAvatarTone("rose");
+      setAvatarStyle("star-bob");
+      setAvatarSkinTone("fair");
       dismissFormError();
       form.reset();
       formDialog.current.close();
@@ -1116,6 +1124,7 @@ function App() {
                           name={person.name}
                           tone={person.tone}
                           avatarStyle={person.avatarStyle}
+                          skinTone={person.skinTone}
                           photo={person.photo}
                         />
                       </div>
@@ -1419,6 +1428,23 @@ function App() {
               placeholder=" e.g. Espresso — Sabrina Carpenter"
             />
           </label>
+          <fieldset>
+            <legend>pick a card vibe</legend>
+            <div className="swatches">
+              {tones.map((tone) => (
+                <label key={tone}>
+                  <input
+                    type="radio"
+                    name="tone"
+                    value={tone}
+                    checked={avatarTone === tone}
+                    onChange={() => setAvatarTone(tone)}
+                  />
+                  <span className={`swatch ${tone}`} />
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <fieldset className="avatar-picker">
             <legend>choose your Girl Code avatar</legend>
             <div className="avatar-picker-grid">
@@ -1438,8 +1464,35 @@ function App() {
                     className="avatar-option-image"
                     tone={avatarTone}
                     avatarStyle={style.id}
+                    skinTone={avatarSkinTone}
                   />
                   <span>{style.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="skin-tone-picker">
+            <legend>choose your skin tone</legend>
+            <div className="skin-tone-options">
+              {SKIN_TONES.map((skin) => (
+                <label
+                  className={`skin-tone-option${avatarSkinTone === skin.id ? " selected" : ""}`}
+                  key={skin.id}
+                >
+                  <input
+                    type="radio"
+                    name="skinTone"
+                    value={skin.id}
+                    checked={avatarSkinTone === skin.id}
+                    onChange={() => setAvatarSkinTone(skin.id)}
+                  />
+                  <Avatar
+                    className="skin-tone-preview"
+                    tone={avatarTone}
+                    avatarStyle={avatarStyle}
+                    skinTone={skin.id}
+                  />
+                  <span>{skin.label}</span>
                 </label>
               ))}
             </div>
@@ -1454,6 +1507,7 @@ function App() {
                 name={avatarName || "Your name"}
                 tone={avatarTone}
                 avatarStyle={avatarStyle}
+                skinTone={avatarSkinTone}
                 photo={avatarPreview}
               />
               <div className="avatar-upload-actions">
@@ -1499,23 +1553,6 @@ function App() {
               </div>
             </div>
           </div>
-          <fieldset>
-            <legend>pick a card vibe</legend>
-            <div className="swatches">
-              {tones.map((tone) => (
-                <label key={tone}>
-                  <input
-                    type="radio"
-                    name="tone"
-                    value={tone}
-                    checked={avatarTone === tone}
-                    onChange={() => setAvatarTone(tone)}
-                  />
-                  <span className={`swatch ${tone}`} />
-                </label>
-              ))}
-            </div>
-          </fieldset>
           <p className="privacy-note">
             Your profile details and song will be visible to people who visit
             this wall. Please do not include private information.
@@ -1551,6 +1588,7 @@ function App() {
                 name={activePerson.name}
                 tone={activePerson.tone}
                 avatarStyle={activePerson.avatarStyle}
+                skinTone={activePerson.skinTone}
                 photo={activePerson.photo}
               />
               <div className="detail-copy">
