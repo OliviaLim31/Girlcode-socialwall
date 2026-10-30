@@ -5,7 +5,7 @@ import AnimatedDialog from "./AnimatedDialog";
 import EventGallery, { defaultMemories } from "./EventGallery";
 import AddMemoryModal from "./AddMemoryModal";
 import Lightbox from "./Lightbox";
-import Avatar from "./Avatar";
+import Avatar, { AVATAR_STYLES } from "./Avatar";
 
 const seed = [
   {
@@ -53,6 +53,7 @@ const seed = [
 const seedProfiles = seed.map((profile, index) => ({
   ...profile,
   id: `seed-${index}`,
+  avatarStyle: AVATAR_STYLES[index % AVATAR_STYLES.length].id,
 }));
 
 const initialProfiles = [
@@ -61,9 +62,13 @@ const initialProfiles = [
 ];
 
 const tones = ["rose", "olive", "lilac", "cream", "blue"];
-const frontendConfig = window.GIRLCODE_SUPABASE || {};
-const supabaseUrl = String(frontendConfig.url || "").replace(/\/$/, "");
-const publishableKey = String(frontendConfig.publishableKey || "");
+const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").replace(
+  /\/$/,
+  "",
+);
+const publishableKey = String(
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
+);
 const backendEnabled = Boolean(supabaseUrl && publishableKey);
 const authClient = backendEnabled
   ? createClient(supabaseUrl, publishableKey)
@@ -166,6 +171,7 @@ async function createProfileOnBackend(person) {
       linkedin: person.linkedin || null,
       about: person.about || null,
       tone: person.tone,
+      avatar_style: person.avatarStyle,
     }),
   });
   const result = await response.json().catch(() => ({}));
@@ -185,6 +191,7 @@ function profileFromRow(row) {
     linkedin: row.linkedin || "",
     about: row.about || "",
     tone: row.tone || "rose",
+    avatarStyle: row.avatar_style || "star-bob",
     photo: row.photo_url || "",
     song: row.song_title
       ? {
@@ -207,11 +214,12 @@ async function insertProfileRow(person, ownerId) {
       linkedin: person.linkedin || null,
       about: person.about || null,
       tone: person.tone,
+      avatar_style: person.avatarStyle,
       song_title: person.song?.title || null,
       song_artist: person.song?.artist || null,
     })
     .select(
-      "id, owner_id, name, instagram, linkedin, about, tone, photo_url, song_title, song_artist, deleted_at, created_at",
+      "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, photo_url, song_title, song_artist, deleted_at, created_at",
     )
     .single();
   if (error) throw error;
@@ -361,6 +369,7 @@ function App() {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarName, setAvatarName] = useState("");
   const [avatarTone, setAvatarTone] = useState("rose");
+  const [avatarStyle, setAvatarStyle] = useState("star-bob");
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
@@ -419,6 +428,8 @@ function App() {
     setAvatarPreview("");
     setAvatarName("");
     setAvatarTone("rose");
+    setAvatarStyle("star-bob");
+    setAvatarStyle("star-bob");
     formDialog.current.showModal();
   };
 
@@ -486,7 +497,7 @@ function App() {
         const { data, error } = await authClient
           .from("profiles")
           .select(
-            "id, owner_id, name, instagram, linkedin, about, tone, photo_url, song_title, song_artist, deleted_at, created_at",
+            "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, photo_url, song_title, song_artist, deleted_at, created_at",
           )
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -671,6 +682,7 @@ function App() {
         linkedin: cleanLinkedIn(data.get("linkedin")),
         about: data.get("about").trim(),
         tone: data.get("tone") || "rose",
+        avatarStyle: data.get("avatarStyle") || "star-bob",
         song,
         photo: "",
       };
@@ -920,6 +932,10 @@ function App() {
                   <p className="sub">
                     a tiny people wall for the girls in the room ♡
                   </p>
+                  <div className="hero-social-follow">
+                    <span>Follow us!</span>
+                    <SocialLinks className="hero-socials" />
+                  </div>
                 </div>
                 <figure className="hero-polaroid hero-polaroid-right">
                   <button
@@ -968,7 +984,6 @@ function App() {
                 >
                   Event Gallery 📸
                 </button>
-                <SocialLinks className="hero-socials" />
               </div>
             </section>
 
@@ -1100,6 +1115,7 @@ function App() {
                           className="portrait"
                           name={person.name}
                           tone={person.tone}
+                          avatarStyle={person.avatarStyle}
                           photo={person.photo}
                         />
                       </div>
@@ -1403,15 +1419,41 @@ function App() {
               placeholder=" e.g. Espresso — Sabrina Carpenter"
             />
           </label>
+          <fieldset className="avatar-picker">
+            <legend>choose your Girl Code avatar</legend>
+            <div className="avatar-picker-grid">
+              {AVATAR_STYLES.map((style) => (
+                <label
+                  className={`avatar-option${avatarStyle === style.id ? " selected" : ""}`}
+                  key={style.id}
+                >
+                  <input
+                    type="radio"
+                    name="avatarStyle"
+                    value={style.id}
+                    checked={avatarStyle === style.id}
+                    onChange={() => setAvatarStyle(style.id)}
+                  />
+                  <Avatar
+                    className="avatar-option-image"
+                    tone={avatarTone}
+                    avatarStyle={style.id}
+                  />
+                  <span>{style.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <div className="avatar-upload-field">
             <span className="avatar-label">
-              profile photo <i>optional</i>
+              use your own photo <i>optional</i>
             </span>
             <div className="avatar-upload-row">
               <Avatar
                 className="avatar-live-preview"
                 name={avatarName || "Your name"}
                 tone={avatarTone}
+                avatarStyle={avatarStyle}
                 photo={avatarPreview}
               />
               <div className="avatar-upload-actions">
@@ -1508,6 +1550,7 @@ function App() {
                 className="detail-portrait portrait"
                 name={activePerson.name}
                 tone={activePerson.tone}
+                avatarStyle={activePerson.avatarStyle}
                 photo={activePerson.photo}
               />
               <div className="detail-copy">

@@ -6,10 +6,25 @@ const palettes = {
   blue: ["#edf6fa", "#8dbaca", "#537b8c", "#83aabb"],
 };
 
+export const AVATAR_STYLES = [
+  { id: "star-bob", label: "Pink bow" },
+  { id: "flower-bob", label: "Flower clip" },
+  { id: "twin-buns", label: "Twin buns" },
+  { id: "side-pony", label: "Side pony" },
+  { id: "heart-clip", label: "Sparkles" },
+];
+
 const hairColors = ["#47343a", "#29272b", "#805844", "#b17a50", "#5a4653"];
 const skinColors = ["#f4cfbd", "#dfb39b", "#f7dccd", "#d39e85", "#edc3aa"];
 const eyeColors = ["#66526b", "#567b83", "#755c55", "#66749a", "#806a50"];
 const ink = "#382c31";
+const avatarStyleDetails = {
+  "star-bob": { hairstyle: 0, accessory: 0 },
+  "flower-bob": { hairstyle: 2, accessory: 2 },
+  "twin-buns": { hairstyle: 1, accessory: 2 },
+  "side-pony": { hairstyle: 3, accessory: 0 },
+  "heart-clip": { hairstyle: 0, accessory: 3 },
+};
 
 function hashSeed(value) {
   let hash = 2166136261;
@@ -23,6 +38,7 @@ function hashSeed(value) {
 export default function Avatar({
   name = "Your name",
   tone = "rose",
+  avatarStyle = "star-bob",
   photo = "",
   className = "",
 }) {
@@ -36,8 +52,9 @@ export default function Avatar({
   const hair = hairColors[seed % hairColors.length];
   const skin = skinColors[(seed >>> 3) % skinColors.length];
   const eyes = eyeColors[(seed >>> 5) % eyeColors.length];
-  const hairstyle = (seed >>> 8) % 4;
-  const accessory = (seed >>> 11) % 4;
+  const style = avatarStyleDetails[avatarStyle] || avatarStyleDetails["star-bob"];
+  const hairstyle = style.hairstyle;
+  const accessory = style.accessory;
   const gradientId = `avatar-bg-${seed.toString(16)}`;
 
   const backHair = [
@@ -105,7 +122,7 @@ export default function Avatar({
           strokeWidth="2.4"
           strokeLinejoin="round"
         />
-        <path d="m78 144 2 4 2-4" fill="none" stroke={accent} strokeWidth="2" />
+        <path d={`m78 144 2 4 2-4`} fill="none" stroke={accent} strokeWidth="2" />
         <path d="M80 151v13" stroke={deepAccent} strokeWidth="2" />
         <path d="M40 163c9 5 18 8 27 9m53-9c-9 5-18 8-27 9" fill="none" stroke="#fff" strokeWidth="2" opacity=".65" />
 

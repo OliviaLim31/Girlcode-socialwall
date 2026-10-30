@@ -19,15 +19,16 @@ A one-page social wall for the Girls' Vibe Coding session.
 - Per-profile guestbook with required author name and message, saved in this browser only
 
 ## Important
-Supabase mode is enabled by creating a local `config.js` from `config.example.js` and filling in the project URL and publishable key. Never put a Supabase secret or service-role key in browser code.
+Supabase mode uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. For local development, copy `.env.example` to `.env.local` and fill in the values from your Supabase project's API settings. For Vercel, add the same two variables in the project's Environment Variables settings, then redeploy. The publishable key is intended for browser use; never use a Supabase secret or service-role key here. Database access must be protected by the `profiles` table's RLS policies.
 
-The Supabase `profiles` table must be available through the Data API and have RLS policies that allow public reads of active profiles and authenticated owners to create their own profile. The app expects these columns: `id`, `owner_id`, `name`, `instagram`, `linkedin`, `about`, `tone`, `photo_url`, `song_title`, `song_artist`, `deleted_at`, and `created_at`. A unique index on `owner_id` enforces one profile per account.
+The Supabase `profiles` table must be available through the Data API and have RLS policies that allow public reads of active profiles and authenticated owners to create their own profile. The app expects these columns: `id`, `owner_id`, `name`, `instagram`, `linkedin`, `about`, `tone`, `avatar_style`, `photo_url`, `song_title`, `song_artist`, `deleted_at`, and `created_at`. Run `supabase/migrations/20261030_add_profile_avatar_style.sql` in the Supabase SQL Editor to add the avatar choice column to an existing table. A unique index on `owner_id` enforces one profile per account.
 
 Profile editing, soft deletion, shared guestbook messages, and Supabase Storage photo uploads are not connected yet. In Supabase mode, the profile photo control is intentionally disabled until shared storage is configured. Guestbook notes, memories, and reactions remain browser-local. The included seed profiles are display examples; they are not rows owned by Supabase accounts.
 
 ## Run locally
 ```bash
 npm install
+copy .env.example .env.local
 npm run dev
 ```
-Then open the local URL printed by Vite (usually `http://localhost:5173`).
+Before starting the app, fill in the two Supabase values in `.env.local`. Then open the local URL printed by Vite (usually `http://localhost:5173`).

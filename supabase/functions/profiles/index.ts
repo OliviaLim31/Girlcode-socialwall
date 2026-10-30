@@ -5,6 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
+const avatarStyles = [
+  "star-bob",
+  "flower-bob",
+  "twin-buns",
+  "side-pony",
+  "heart-clip",
+];
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const publishableKey =
@@ -27,7 +34,9 @@ Deno.serve(async (request) => {
     if (request.method === "GET") {
       let query = client
         .from("profiles")
-        .select("id, name, instagram, linkedin, about, tone, photo_url, owner_id, created_at")
+        .select(
+          "id, name, instagram, linkedin, about, tone, avatar_style, photo_url, owner_id, created_at",
+        )
         .order("created_at", { ascending: true });
 
       const id = url.searchParams.get("id");
@@ -57,6 +66,8 @@ Deno.serve(async (request) => {
       const linkedin = typeof body.linkedin === "string" ? body.linkedin.trim() : null;
       const about = typeof body.about === "string" ? body.about.trim() : null;
       const tone = typeof body.tone === "string" ? body.tone : "rose";
+      const avatarStyle =
+        typeof body.avatar_style === "string" ? body.avatar_style : "star-bob";
 
       if (!name || name.length > 40 || !/^[a-zA-Z0-9._]{1,30}$/.test(instagram)) {
         return json({ error: "Name or Instagram username is invalid." }, 422);
@@ -64,11 +75,24 @@ Deno.serve(async (request) => {
       if (!["rose", "olive", "lilac", "cream", "blue"].includes(tone)) {
         return json({ error: "Card tone is invalid." }, 422);
       }
+      if (!avatarStyles.includes(avatarStyle)) {
+        return json({ error: "Avatar style is invalid." }, 422);
+      }
 
       const { data, error } = await userClient
         .from("profiles")
-        .insert({ owner_id: authData.user.id, name, instagram, linkedin, about, tone })
-        .select("id, name, instagram, linkedin, about, tone, photo_url, owner_id, created_at")
+        .insert({
+          owner_id: authData.user.id,
+          name,
+          instagram,
+          linkedin,
+          about,
+          tone,
+          avatar_style: avatarStyle,
+        })
+        .select(
+          "id, name, instagram, linkedin, about, tone, avatar_style, photo_url, owner_id, created_at",
+        )
         .single();
 
       if (error) return json({ error: error.message }, 400);

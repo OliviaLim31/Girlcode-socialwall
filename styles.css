@@ -135,6 +135,12 @@ body:before{
 .hero-polaroid-right .polaroid-open img{transform:translateX(-12%) scale(1.3);transition:transform .3s ease}
 .hero-polaroid figcaption{display:grid;place-items:center;min-height:45px;padding:8px 0;font:italic 17px/1.15 "Instrument Serif",serif;color:#595248}
 @media(hover:hover){.hero-polaroid:hover{transform:translateY(-5px) rotate(0deg)}}
+.hero-social-follow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:2em auto 0}
+.hero-social-follow>span{font-size:13px;font-weight:600;letter-spacing:.02em;opacity:.78;white-space:nowrap}
+.hero-socials a{width:34px;height:34px}
+.social-links.hero-socials a{background:rgba(157,127,194,.3);border-color:rgba(125,94,163,.38);color:#594373}
+.social-links.hero-socials a:hover{background:rgba(157,127,194,.52);box-shadow:0 5px 14px rgba(89,67,115,.2)}
+.hero-socials svg{width:16px;height:16px}
 
 .eyebrow,.tiny{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:600}
 .eyebrow{opacity:.7;margin-bottom:18px}
@@ -729,6 +735,21 @@ dialog::backdrop{background:rgba(31,34,29,.38);backdrop-filter:blur(6px)}
   display:block;font-size:22px;color:rgba(35,35,31,.35);
 }
 .avatar-live-preview .portrait-art,.avatar-live-preview .portrait-photo{border-radius:inherit}
+.avatar-picker{margin-top:16px}
+.avatar-picker legend{font-size:12px;font-weight:600;margin-bottom:8px}
+.avatar-picker-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.avatar-option{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-width:0;padding:7px 3px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(255,255,255,.55);font-size:10px;text-align:center;cursor:pointer;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease;
+}
+.avatar-option:hover{transform:translateY(-2px);background:#fff}
+.avatar-option.selected{border-color:#7560b3;background:#f5f0ff;box-shadow:0 0 0 2px rgba(117,96,179,.16)}
+.avatar-option input{position:absolute;width:1px;height:1px;opacity:0}
+.avatar-option:focus-within{outline:2px solid var(--ink);outline-offset:2px}
+.avatar-option-image{width:48px;height:48px;overflow:hidden;border-radius:50%;box-shadow:0 2px 6px rgba(35,35,31,.1)}
+.avatar-option-image .portrait-art{border-radius:inherit}
 .avatar-upload-actions{display:flex;flex-direction:column;gap:5px;flex:1}
 .visually-hidden-file{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .avatar-btns-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -771,6 +792,9 @@ fieldset{border:0;padding:0}
   .gallery-polaroid-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 18px}
 }
 @media(max-width:860px){
+  .avatar-picker-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  .avatar-option{padding:6px 2px;font-size:9px}
+  .avatar-option-image{width:42px;height:42px}
   .site-nav{
     display:grid;grid-template-columns:1fr auto;row-gap:10px;
   }
