@@ -1025,47 +1025,6 @@ footer{margin-top:84px}
   .music-card .vinyl{width:min(100%,140px)}
 }
 
-/* ID card: clear acrylic card, photo on the left, org + name on the right, socials across the bottom */
-.person-card.rose{--tone:224,158,241}
-.person-card.olive{--tone:149,153,214}
-.person-card.lilac{--tone:185,154,221}
-.person-card.cream{--tone:242,215,249}
-.person-card.blue{--tone:190,194,230}
-.person-card[class]{
-  grid-template-columns:40% minmax(0,1fr);grid-template-rows:auto auto;gap:10px 14px;
-  min-height:0;padding:20px 14px 12px;
-  background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(var(--tone),.3));
-  border:1.5px solid rgba(20,19,57,.14);
-}
-.person-card[class]::before{display:none}
-.person-card::after{content:"✦";position:absolute;left:7px;top:3px;font-size:18px;line-height:1;color:#141339;z-index:2;pointer-events:none}
-.portrait-wrap{
-  grid-column:1;grid-row:1;align-self:start;height:auto;aspect-ratio:1;
-  border:2px solid #141339;border-radius:14px;background:#fff;box-shadow:3px 3px 0 #141339;
-}
-.person-card:hover .portrait-wrap{box-shadow:4px 4px 0 #141339}
-.id-card-copy{grid-column:2;grid-row:1;align-self:center;padding:0}
-.id-card-org{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.id-card-name-title{font:400 clamp(19px,1.9vw,24px)/1.05 var(--title-font);margin:3px 0 0;overflow-wrap:anywhere}
-.id-card-rule{position:relative;display:block;height:1px;margin:12px 6px 10px;background:rgba(20,19,57,.55)}
-.id-card-rule::before,.id-card-rule::after{content:"✦";position:absolute;top:-8px;font-size:12px;line-height:1;color:#141339}
-.id-card-rule::before{left:-8px}
-.id-card-rule::after{right:-8px}
-.id-card-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.id-card-actions .card-open{padding:0;font-size:10px}
-.id-card-socials{
-  grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;
-  padding-top:10px;border-top:1px dashed rgba(20,19,57,.3);
-}
-.id-card-socials a{
-  position:relative;z-index:4;display:inline-flex;align-items:center;gap:7px;min-width:0;
-  color:inherit;text-decoration:none;font-size:11px;font-weight:600;
-}
-.id-card-socials a:only-child{grid-column:1/-1}
-.id-card-socials span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.id-card-socials a:hover span{text-decoration:underline}
-.id-card-socials svg{width:15px;height:15px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.id-card-socials .dot,.id-card-socials .li{fill:currentColor;stroke:none}
 /* stickers sit above the full-card click target so they can be dragged */
 .card-sticker-layer{z-index:5}
 
@@ -1088,17 +1047,6 @@ footer{margin-top:84px}
 }
 .about-us h2 .hl{font-weight:inherit}
 
-/* ID cards: more room around and inside each card, squarer corners */
-.wall{gap:40px 36px}
-.person-card[class]{border-radius:10px;padding:26px 20px 18px;gap:14px 18px}
-.person-card[class] .card-open::after{border-radius:10px}
-.portrait-wrap{border-radius:8px}
-.id-card-socials{padding-top:14px}
-@media(max-width:620px){
-  .wall{gap:28px}
-  .person-card[class]{padding:22px 16px 16px}
-}
-
 /* about-us picture: little flowers pop up beside it on hover */
 .about-us-art-wrap{position:relative;width:100%;max-width:280px;justify-self:center}
 .about-us-art-wrap .about-us-art{display:block;max-width:100%}
@@ -1114,3 +1062,23 @@ footer{margin-top:84px}
 .flower.soft{--petal:#f2d7f9}
 .about-us-art-wrap:hover .flower{opacity:1;transform:scale(1) rotate(var(--r));animation:flower-sway 2.6s ease-in-out infinite;animation-delay:calc(var(--d) + .6s)}
 @keyframes flower-sway{50%{translate:0 -5px}}
+
+/* profile pic mode toggle */
+.avatar-mode-picker{border:0;padding:0;margin:0}
+.avatar-mode-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.avatar-mode-option{position:relative;display:flex;align-items:center;justify-content:center;padding:16px 12px;border:2px solid #e2e2e6;border-radius:12px;background:#fff;font-weight:800;cursor:pointer;text-align:center;transition:border-color .2s,background .2s}
+.avatar-mode-option input{position:absolute;opacity:0;pointer-events:none}
+.avatar-mode-option.selected{border-color:var(--purple,#302D72);background:#f3effd}
+@media(max-width:520px){.avatar-mode-options{grid-template-columns:1fr}}
+
+/* soundtrack doodles */
+.music-gallery{position:relative}
+.music-gallery::before,.music-gallery::after{content:"";position:absolute;pointer-events:none;background-repeat:no-repeat;background-size:contain;opacity:.35}
+.music-gallery::before{left:27%;top:22px;width:150px;height:118px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 140 110%22 fill=%22none%22 stroke=%22%2378779B%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M30 92V28l52-12v62%22/%3E%3Cellipse cx=%2220%22 cy=%2294%22 rx=%2212%22 ry=%229%22/%3E%3Cellipse cx=%2272%22 cy=%2280%22 rx=%2212%22 ry=%229%22/%3E%3Cpath d=%22M30 44l52-12%22/%3E%3Cpath d=%22M112 30l4 10 10 4-10 4-4 10-4-10-10-4 10-4z%22/%3E%3C/svg%3E");rotate:-8deg}
+.music-gallery::after{right:24px;bottom:22px;width:110px;height:110px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 130 130%22 fill=%22none%22 stroke=%22%2378779B%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M40 20c-14 10-6 26 6 30s18 14 8 26-26 8-26-8%22/%3E%3Cpath d=%22M40 8v90%22/%3E%3Ccircle cx=%2228%22 cy=%22104%22 r=%229%22/%3E%3Cpath d=%22M92 40v42%22/%3E%3Cellipse cx=%2284%22 cy=%2284%22 rx=%2210%22 ry=%228%22/%3E%3Cpath d=%22M92 40c10 2 16 8 14 18%22/%3E%3Cpath d=%22M104 96l3 8 8 3-8 3-3 8-3-8-8-3 8-3z%22/%3E%3C/svg%3E");rotate:8deg}
+@media(max-width:760px){.music-gallery::before{left:auto;right:18px;top:16px;width:70px;height:56px}.music-gallery::after{width:64px;height:64px}}
+
+/* empty soundtrack vinyl = one social-card column wide */
+.music-empty .vinyl{width:calc((100% - 22px - 3*28px)/4)}
+@media(max-width:1000px){.music-empty .vinyl{width:calc((100% - 22px - 2*20px)/3)}}
+@media(max-width:760px){.music-empty .vinyl{width:min(100%,180px)}.music-empty{flex-direction:column;align-items:flex-start}}

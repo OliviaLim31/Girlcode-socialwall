@@ -561,6 +561,7 @@ function App() {
   const [avatarName, setAvatarName] = useState("");
   const [avatarTone, setAvatarTone] = useState("rose");
   const [avatarStyle, setAvatarStyle] = useState("star-bob");
+  const [avatarMode, setAvatarMode] = useState("avatar");
   const [avatarSkinTone, setAvatarSkinTone] = useState("fair");
   const [cardStickers, setCardStickers] = useState([]);
 
@@ -646,6 +647,7 @@ function App() {
     }
     dismissFormError();
     setAvatarPreview("");
+    setAvatarMode("avatar");
     setAvatarName("");
     setAvatarTone("rose");
     setAvatarStyle("star-bob");
@@ -945,6 +947,7 @@ function App() {
       setPeople((current) => [...current, savedPerson]);
       setQuery("");
       setAvatarPreview("");
+      setAvatarMode("avatar");
       setAvatarName("");
       setAvatarTone("rose");
       setAvatarStyle("star-bob");
@@ -1206,17 +1209,6 @@ function App() {
                 ribbonColor="#A83AC2ff"
                 ribbonWidth={66}
               />
-              <div className="hero-actions">
-                <button
-                  className="ghost"
-                  onClick={() => {
-                    setActiveTab("gallery");
-                    scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                >
-                  Event Gallery
-                </button>
-              </div>
             </section>
 
             <section className="about-us" aria-labelledby="aboutUsTitle">
@@ -1327,6 +1319,52 @@ function App() {
                         "--enter-delay": `${Math.min(index, 7) * 65}ms`,
                       }}
                     >
+                      <div className="id-card-copy">
+                        <div className="id-card-top">
+                          <span className="id-card-label">ID-CARD</span>
+                          <span className="id-card-markers" aria-hidden="true">
+                            <i />
+                            <i />
+                            <i />
+                          </span>
+                        </div>
+                        <div className="id-card-name">
+                          <span className="id-card-field-label">NAME</span>
+                          <h3>{person.name}</h3>
+                        </div>
+                        <div className="id-card-handle">
+                          <span className="id-card-field-label">HANDLE</span>
+                          <span>@{person.ig}</span>
+                        </div>
+                        <div className="id-card-skill">
+                          <span className="id-card-field-label">SKILL / VIBE</span>
+                          <p className="about">
+                            {person.about || "say hi if you see me around ♡"}
+                          </p>
+                        </div>
+                        {person.song && (
+                          <a
+                            className="song-chip"
+                            href={spotifySearchUrl(person.song)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <span aria-hidden="true"></span>
+                            <span>
+                              <strong>{person.song.title}</strong>
+                              {person.song.artist && (
+                                <small>{person.song.artist}</small>
+                              )}
+                            </span>
+                          </a>
+                        )}
+                        <button
+                          className="card-open"
+                          onClick={() => openProfile(person)}
+                        >
+                          view profile ↗
+                        </button>
+                      </div>
                       <div className="portrait-wrap">
                         <Avatar
                           className="portrait"
@@ -1337,42 +1375,12 @@ function App() {
                           photo={person.photo}
                         />
                       </div>
-                      <div className="id-card-copy">
-                        <span className="id-card-org">{person.org || "girlcode member"}</span>
-                        <h3 className="id-card-name-title">{person.name}</h3>
-                        <span className="id-card-rule" aria-hidden="true" />
-                        <div className="id-card-actions">
-                          <button
-                            className="card-open"
-                            onClick={() => openProfile(person)}
-                          >
-                            view profile ↗
-                          </button>
-                          {personNotes.length > 0 && (
-                            <span className="note-count-pill">
-                              {personNotes.length} notes
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="id-card-socials">
-                        <a
-                          href={`https://instagram.com/${encodeURIComponent(person.ig)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <InstagramIcon />
-                          <span>@{person.ig}</span>
-                        </a>
-                        {safeLinkedIn(person.linkedin) && (
-                          <a
-                            href={safeLinkedIn(person.linkedin)}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <LinkedInIcon />
-                            <span>linkedin</span>
-                          </a>
+                      <div className="id-card-footer">
+                        <span className="id-card-barcode" aria-hidden="true" />
+                        {personNotes.length > 0 && (
+                          <span className="note-count-pill">
+                            {personNotes.length} notes
+                          </span>
                         )}
                       </div>
                       {person.stickers?.length > 0 && (
@@ -1718,81 +1726,36 @@ function App() {
               ))}
             </div>
           </fieldset>
-          <fieldset className="avatar-picker">
-            <legend>choose your Girl Code avatar</legend>
-            <div className="avatar-picker-grid">
-              {AVATAR_STYLES.map((style) => (
+          <fieldset className="avatar-mode-picker">
+            <legend>your profile pic</legend>
+            <div className="avatar-mode-options">
+              {[
+                ["photo", "upload my own photo"],
+                ["avatar", "use a Girl Code avatar"],
+              ].map(([mode, label]) => (
                 <label
-                  className={`avatar-option${avatarStyle === style.id ? " selected" : ""}`}
-                  key={style.id}
+                  className={`avatar-mode-option${avatarMode === mode ? " selected" : ""}`}
+                  key={mode}
                 >
                   <input
                     type="radio"
-                    name="avatarStyle"
-                    value={style.id}
-                    checked={avatarStyle === style.id}
-                    onChange={() => setAvatarStyle(style.id)}
+                    name="avatarMode"
+                    value={mode}
+                    checked={avatarMode === mode}
+                    onChange={() => {
+                      setAvatarMode(mode);
+                      if (mode === "avatar") setAvatarPreview("");
+                    }}
                   />
-                  <Avatar
-                    className="avatar-option-image"
-                    tone={avatarTone}
-                    avatarStyle={style.id}
-                    skinTone={avatarSkinTone}
-                  />
-                  <span>{style.label}</span>
+                  <span>{label}</span>
                 </label>
               ))}
             </div>
           </fieldset>
-          <fieldset className="skin-tone-picker">
-            <legend>choose your skin tone</legend>
-            <div className="skin-tone-options">
-              {SKIN_TONES.map((skin) => (
-                <label
-                  className={`skin-tone-option${avatarSkinTone === skin.id ? " selected" : ""}`}
-                  key={skin.id}
-                >
-                  <input
-                    type="radio"
-                    name="skinTone"
-                    value={skin.id}
-                    checked={avatarSkinTone === skin.id}
-                    onChange={() => setAvatarSkinTone(skin.id)}
-                  />
-                  <Avatar
-                    className="skin-tone-preview"
-                    tone={avatarTone}
-                    avatarStyle={avatarStyle}
-                    skinTone={skin.id}
-                  />
-                  <span>{skin.label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="card-sticker-picker">
-            <legend>pick up to 2 stickers for your card</legend>
-            <div className="card-sticker-options">
-              {STICKER_SET.map((sticker) => {
-                const picked = cardStickers.includes(sticker.id);
-                return (
-                  <button
-                    type="button"
-                    key={sticker.id}
-                    className={`card-sticker-option${picked ? " selected" : ""}`}
-                    aria-pressed={picked}
-                    disabled={!picked && cardStickers.length >= 2}
-                    onClick={() => toggleCardSticker(sticker.id)}
-                  >
-                    <img src={sticker.src} alt={sticker.id.replace(/-/g, " ")} draggable={false} />
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
+          {avatarMode === "photo" ? (
           <div className="avatar-upload-field">
             <span className="avatar-label">
-              use your own photo <i>optional</i>
+              upload your photo
             </span>
             <div className="avatar-upload-row">
               <Avatar
@@ -1846,6 +1809,82 @@ function App() {
               </div>
             </div>
           </div>
+          ) : (
+            <>
+          <fieldset className="avatar-picker">
+            <legend>choose your Girl Code avatar</legend>
+            <div className="avatar-picker-grid">
+              {AVATAR_STYLES.map((style) => (
+                <label
+                  className={`avatar-option${avatarStyle === style.id ? " selected" : ""}`}
+                  key={style.id}
+                >
+                  <input
+                    type="radio"
+                    name="avatarStyle"
+                    value={style.id}
+                    checked={avatarStyle === style.id}
+                    onChange={() => setAvatarStyle(style.id)}
+                  />
+                  <Avatar
+                    className="avatar-option-image"
+                    tone={avatarTone}
+                    avatarStyle={style.id}
+                    skinTone={avatarSkinTone}
+                  />
+                  <span>{style.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="skin-tone-picker">
+            <legend>choose your skin tone</legend>
+            <div className="skin-tone-options">
+              {SKIN_TONES.map((skin) => (
+                <label
+                  className={`skin-tone-option${avatarSkinTone === skin.id ? " selected" : ""}`}
+                  key={skin.id}
+                >
+                  <input
+                    type="radio"
+                    name="skinTone"
+                    value={skin.id}
+                    checked={avatarSkinTone === skin.id}
+                    onChange={() => setAvatarSkinTone(skin.id)}
+                  />
+                  <Avatar
+                    className="skin-tone-preview"
+                    tone={avatarTone}
+                    avatarStyle={avatarStyle}
+                    skinTone={skin.id}
+                  />
+                  <span>{skin.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+            </>
+          )}
+          <fieldset className="card-sticker-picker">
+            <legend>pick up to 2 stickers for your card</legend>
+            <div className="card-sticker-options">
+              {STICKER_SET.map((sticker) => {
+                const picked = cardStickers.includes(sticker.id);
+                return (
+                  <button
+                    type="button"
+                    key={sticker.id}
+                    className={`card-sticker-option${picked ? " selected" : ""}`}
+                    aria-pressed={picked}
+                    disabled={!picked && cardStickers.length >= 2}
+                    onClick={() => toggleCardSticker(sticker.id)}
+                  >
+                    <img src={sticker.src} alt={sticker.id.replace(/-/g, " ")} draggable={false} />
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
           <p className="privacy-note">
             Your profile details and song will be visible to people who visit
             this wall. Please do not include private information.
@@ -1887,7 +1926,6 @@ function App() {
               <div className="detail-copy">
                 <span className="detail-field-label">NAME</span>
                 <h2 id="detailName">{activePerson.name}</h2>
-                <p className="detail-handle">@{activePerson.ig}</p>
                 <p className="detail-about">
                   {activePerson.about || "say hi if you see me around ♡"}
                 </p>
@@ -1938,11 +1976,6 @@ function App() {
             </div>
             <section className="guestbook">
               <h3>leave a little note ♡</h3>
-              <p className="note-help privacy-note">
-                Notes are saved in this browser only; they are not sent to the
-                person. Anyone using this browser may be able to see them, so
-                please do not include private information.
-              </p>
               <ul className="message-list" aria-live="polite">
                 {messages.filter((m) => m?.personId === activePerson.id)
                   .length ? (
