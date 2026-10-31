@@ -1014,3 +1014,14 @@ footer{margin-top:84px}
 .music-empty{display:flex;align-items:center;gap:16px;margin:0;padding:8px 4px}
 .music-empty .vinyl{width:72px;flex-shrink:0}
 .music-empty p{margin:0;font-size:14px;opacity:.75}
+
+/* soundtrack grid: bigger records stacked above the song, 4 per row on desktop, 2 on mobile */
+.music-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.music-card{grid-template-columns:1fr;justify-items:center;text-align:center;gap:14px;padding:22px 16px 18px}
+.music-card .vinyl{width:min(100%,180px)}
+.music-copy{width:100%}
+@media(max-width:860px){
+  .music-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .music-card{padding:16px 10px 14px}
+  .music-card .vinyl{width:min(100%,140px)}
+}
