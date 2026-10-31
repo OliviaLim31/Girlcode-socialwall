@@ -365,6 +365,33 @@ function StickerLayer() {
   return <StickerBoard className="sticker-layer" items={items} editable onCommit={commit} />;
 }
 
+// small flowers that pop up beside the about-us drawing on hover (pure svg, no emoji)
+const ABOUT_FLOWERS = [
+  { x: -14, y: 14, size: 30, rot: -12, delay: 0, tone: "pink" },
+  { x: -6, y: 58, size: 22, rot: 10, delay: 90, tone: "lilac" },
+  { x: 96, y: 8, size: 24, rot: 14, delay: 45, tone: "lilac" },
+  { x: 104, y: 46, size: 32, rot: -8, delay: 135, tone: "pink" },
+  { x: 90, y: 82, size: 22, rot: 20, delay: 180, tone: "soft" },
+];
+
+function Flower({ x, y, size, rot, delay, tone }) {
+  return (
+    <svg
+      className={`flower ${tone}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{ "--x": `${x}%`, "--y": `${y}%`, "--s": `${size}px`, "--r": `${rot}deg`, "--d": `${delay}ms` }}
+    >
+      <circle cx="12" cy="5.5" r="4.2" />
+      <circle cx="18.2" cy="10" r="4.2" />
+      <circle cx="15.8" cy="17.3" r="4.2" />
+      <circle cx="8.2" cy="17.3" r="4.2" />
+      <circle cx="5.8" cy="10" r="4.2" />
+      <circle className="core" cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 function InstagramIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1196,7 +1223,11 @@ function App() {
               <div className="about-us-copy">
                 <div className="tiny">who are we?</div>
                 <h2 id="aboutUsTitle">
-                  <Letters text="a girls-only tech community" />
+                  <Letters text="a" />
+                  <span className="hl">
+                    <Letters text="girls-only" start={1} />
+                  </span>
+                  <Letters text="tech community" start={11} />
                 </h2>
                 <p>
                   a <span className="hl">comfortable space</span> to learn tech with
@@ -1207,11 +1238,16 @@ function App() {
                   guidance from <span className="hl">malaysian women in tech</span>.
                 </p>
               </div>
-              <img
-                className="about-us-art"
-                src="/stickers/about-laptop-girl.png"
-                alt="hand-drawn girl coding on her laptop with a coffee"
-              />
+              <div className="about-us-art-wrap">
+                <img
+                  className="about-us-art"
+                  src="/stickers/about-laptop-girl.png"
+                  alt="hand-drawn girl coding on her laptop with a coffee"
+                />
+                {ABOUT_FLOWERS.map((flower, i) => (
+                  <Flower key={i} {...flower} />
+                ))}
+              </div>
             </section>
 
             <section className="toolbar">

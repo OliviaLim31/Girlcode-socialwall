@@ -949,7 +949,6 @@ body{
     linear-gradient(rgba(35,35,31,.07) 1px,transparent 1px),
     linear-gradient(90deg,rgba(35,35,31,.07) 1px,transparent 1px);
   background-size:28px 28px;
-  background-attachment:fixed;
 }
 body:before,.ambient{display:none}
 
@@ -1036,7 +1035,7 @@ footer{margin-top:84px}
   grid-template-columns:40% minmax(0,1fr);grid-template-rows:auto auto;gap:10px 14px;
   min-height:0;padding:20px 14px 12px;
   background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(var(--tone),.3));
-  backdrop-filter:blur(14px);border:1.5px solid rgba(20,19,57,.14);
+  border:1.5px solid rgba(20,19,57,.14);
 }
 .person-card[class]::before{display:none}
 .person-card::after{content:"✦";position:absolute;left:7px;top:3px;font-size:18px;line-height:1;color:#141339;z-index:2;pointer-events:none}
@@ -1087,3 +1086,31 @@ footer{margin-top:84px}
   .about-us{grid-template-columns:1fr;gap:20px}
   .about-us-art{max-width:200px}
 }
+.about-us h2 .hl{font-weight:inherit}
+
+/* ID cards: more room around and inside each card, squarer corners */
+.wall{gap:40px 36px}
+.person-card[class]{border-radius:10px;padding:26px 20px 18px;gap:14px 18px}
+.person-card[class] .card-open::after{border-radius:10px}
+.portrait-wrap{border-radius:8px}
+.id-card-socials{padding-top:14px}
+@media(max-width:620px){
+  .wall{gap:28px}
+  .person-card[class]{padding:22px 16px 16px}
+}
+
+/* about-us picture: little flowers pop up beside it on hover */
+.about-us-art-wrap{position:relative;width:100%;max-width:280px;justify-self:center}
+.about-us-art-wrap .about-us-art{display:block;max-width:100%}
+.flower{
+  position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);pointer-events:none;
+  opacity:0;transform:scale(0) rotate(-45deg);
+  transition:opacity .3s ease,transform .55s cubic-bezier(.34,1.56,.64,1);transition-delay:var(--d);
+}
+.flower circle{fill:var(--petal);stroke:#141339;stroke-width:.8}
+.flower .core{fill:#fff6c9}
+.flower.pink{--petal:#f8a6c8}
+.flower.lilac{--petal:#c9b2ec}
+.flower.soft{--petal:#f2d7f9}
+.about-us-art-wrap:hover .flower{opacity:1;transform:scale(1) rotate(var(--r));animation:flower-sway 2.6s ease-in-out infinite;animation-delay:calc(var(--d) + .6s)}
+@keyframes flower-sway{50%{translate:0 -5px}}
