@@ -93,6 +93,9 @@ function cleanIg(value = "") {
     .replace(/\/.*$/, "");
 }
 
+// the form starts with this prefilled, so a bare prefix means "no LinkedIn"
+const LINKEDIN_PREFIX = "linkedin.com/in/";
+
 function cleanLinkedIn(value = "") {
   return (
     value.trim() &&
@@ -194,6 +197,7 @@ function profileFromRow(row) {
     linkedin: row.linkedin || "",
     about: row.about || "",
     tone: row.tone || "rose",
+    org: row.org || "",
     stickers: Array.isArray(row.stickers) ? row.stickers : [],
     avatarStyle: row.avatar_style || "star-bob",
     skinTone: row.skin_tone || "fair",
@@ -218,6 +222,7 @@ async function insertProfileRow(person, ownerId) {
       instagram: person.ig,
       linkedin: person.linkedin || null,
       about: person.about || null,
+      org: person.org || null,
       tone: person.tone,
       avatar_style: person.avatarStyle,
       skin_tone: person.skinTone,
@@ -226,7 +231,7 @@ async function insertProfileRow(person, ownerId) {
       stickers: person.stickers || [],
     })
     .select(
-      "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
+      "id, owner_id, name, instagram, linkedin, about, org, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
     )
     .single();
   if (error) throw error;
@@ -358,6 +363,24 @@ function StickerLayer() {
       JSON.stringify(Object.fromEntries(list.map((s) => [s.id, { x: s.x, y: s.y }]))),
     );
   return <StickerBoard className="sticker-layer" items={items} editable onCommit={commit} />;
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle className="dot" cx="17.7" cy="6.6" r="1.1" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="li">
+      <path d="M5.2 8.6H2.4V21h2.8V8.6ZM3.8 7.3a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4ZM21.6 13.9c0-3.7-2-5.5-4.7-5.5a4.1 4.1 0 0 0-3.7 2v-1.8H10.4V21h2.8v-6.1c0-1.6.3-3.2 2.4-3.2 2 0 2.1 1.9 2.1 3.3V21h2.8l1.1-7.1Z" />
+    </svg>
+  );
 }
 
 function SocialLinks({ className }) {
@@ -668,7 +691,7 @@ function App() {
         const { data, error } = await authClient
           .from("profiles")
           .select(
-            "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
+            "id, owner_id, name, instagram, linkedin, about, org, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
           )
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -850,8 +873,12 @@ function App() {
         id: crypto.randomUUID(),
         name: data.get("name").trim(),
         ig: cleanIg(data.get("instagram")),
-        linkedin: cleanLinkedIn(data.get("linkedin")),
+        linkedin:
+          String(data.get("linkedin")).trim() === LINKEDIN_PREFIX
+            ? ""
+            : cleanLinkedIn(data.get("linkedin")),
         about: data.get("about").trim(),
+        org: data.get("org").trim(),
         tone: data.get("tone") || "rose",
         avatarStyle: data.get("avatarStyle") || "star-bob",
         skinTone: data.get("skinTone") || "fair",
@@ -1165,6 +1192,28 @@ function App() {
               </div>
             </section>
 
+            <section className="about-us" aria-labelledby="aboutUsTitle">
+              <div className="about-us-copy">
+                <div className="tiny">who are we?</div>
+                <h2 id="aboutUsTitle">
+                  <Letters text="a girls-only tech community" />
+                </h2>
+                <p>
+                  a <span className="hl">comfortable space</span> to learn tech with
+                  other girls. meet girls who are building too, make{" "}
+                  <span className="hl">new friends</span>, find{" "}
+                  <span className="hl">teammates</span> and learn together. we keep our
+                  meetups <span className="hl">small</span> so everyone gets heard, with
+                  guidance from <span className="hl">malaysian women in tech</span>.
+                </p>
+              </div>
+              <img
+                className="about-us-art"
+                src="/stickers/about-laptop-girl.png"
+                alt="hand-drawn girl coding on her laptop with a coffee"
+              />
+            </section>
+
             <section className="toolbar">
               <div className="wall-heading">
                 <div>
@@ -1242,52 +1291,6 @@ function App() {
                         "--enter-delay": `${Math.min(index, 7) * 65}ms`,
                       }}
                     >
-                      <div className="id-card-copy">
-                        <div className="id-card-top">
-                          <span className="id-card-label">ID-CARD</span>
-                          <span className="id-card-markers" aria-hidden="true">
-                            <i />
-                            <i />
-                            <i />
-                          </span>
-                        </div>
-                        <div className="id-card-name">
-                          <span className="id-card-field-label">NAME</span>
-                          <h3>{person.name}</h3>
-                        </div>
-                        <div className="id-card-handle">
-                          <span className="id-card-field-label">HANDLE</span>
-                          <span>@{person.ig}</span>
-                        </div>
-                        <div className="id-card-skill">
-                          <span className="id-card-field-label">SKILL / VIBE</span>
-                          <p className="about">
-                            {person.about || "say hi if you see me around ♡"}
-                          </p>
-                        </div>
-                        {person.song && (
-                          <a
-                            className="song-chip"
-                            href={spotifySearchUrl(person.song)}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <span aria-hidden="true"></span>
-                            <span>
-                              <strong>{person.song.title}</strong>
-                              {person.song.artist && (
-                                <small>{person.song.artist}</small>
-                              )}
-                            </span>
-                          </a>
-                        )}
-                        <button
-                          className="card-open"
-                          onClick={() => openProfile(person)}
-                        >
-                          view profile ↗
-                        </button>
-                      </div>
                       <div className="portrait-wrap">
                         <Avatar
                           className="portrait"
@@ -1298,12 +1301,42 @@ function App() {
                           photo={person.photo}
                         />
                       </div>
-                      <div className="id-card-footer">
-                        <span className="id-card-barcode" aria-hidden="true" />
-                        {personNotes.length > 0 && (
-                          <span className="note-count-pill">
-                            {personNotes.length} notes
-                          </span>
+                      <div className="id-card-copy">
+                        <span className="id-card-org">{person.org || "girlcode member"}</span>
+                        <h3 className="id-card-name-title">{person.name}</h3>
+                        <span className="id-card-rule" aria-hidden="true" />
+                        <div className="id-card-actions">
+                          <button
+                            className="card-open"
+                            onClick={() => openProfile(person)}
+                          >
+                            view profile ↗
+                          </button>
+                          {personNotes.length > 0 && (
+                            <span className="note-count-pill">
+                              {personNotes.length} notes
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="id-card-socials">
+                        <a
+                          href={`https://instagram.com/${encodeURIComponent(person.ig)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <InstagramIcon />
+                          <span>@{person.ig}</span>
+                        </a>
+                        {safeLinkedIn(person.linkedin) && (
+                          <a
+                            href={safeLinkedIn(person.linkedin)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <LinkedInIcon />
+                            <span>linkedin</span>
+                          </a>
                         )}
                       </div>
                       {person.stickers?.length > 0 && (
@@ -1592,7 +1625,27 @@ function App() {
             <span>
               linkedin <i>optional</i>
             </span>
-            <input name="linkedin" placeholder="linkedin.com/in/yourname" />
+            <input
+              name="linkedin"
+              defaultValue={LINKEDIN_PREFIX}
+              onFocus={(e) => {
+                const input = e.target;
+                if (input.value === LINKEDIN_PREFIX)
+                  requestAnimationFrame(() =>
+                    input.setSelectionRange(input.value.length, input.value.length),
+                  );
+              }}
+            />
+          </label>
+          <label>
+            <span>
+              education / company <i>optional</i>
+            </span>
+            <input
+              name="org"
+              maxLength="60"
+              placeholder="e.g. Sunway University or Grab"
+            />
           </label>
           <label>
             <span>come talk to me about...</span>
