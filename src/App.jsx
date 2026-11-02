@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useLayoutEffect } from "react";
+import { flushSync } from "react-dom";
 import { createClient } from "@supabase/supabase-js";
 import TextLoop from "./TextLoop";
 import AnimatedDialog from "./AnimatedDialog";
@@ -91,6 +92,9 @@ function cleanIg(value = "") {
     .replace(/^https?:\/\/(www\.)?instagram\.com\//, "")
     .replace(/\/.*$/, "");
 }
+
+// the form starts with this prefilled, so a bare prefix means "no LinkedIn"
+const LINKEDIN_PREFIX = "linkedin.com/in/";
 
 function cleanLinkedIn(value = "") {
   return (
@@ -193,6 +197,8 @@ function profileFromRow(row) {
     linkedin: row.linkedin || "",
     about: row.about || "",
     tone: row.tone || "rose",
+    org: row.org || "",
+    stickers: Array.isArray(row.stickers) ? row.stickers : [],
     avatarStyle: row.avatar_style || "star-bob",
     skinTone: row.skin_tone || "fair",
     photo: row.photo_url || "",
@@ -216,14 +222,16 @@ async function insertProfileRow(person, ownerId) {
       instagram: person.ig,
       linkedin: person.linkedin || null,
       about: person.about || null,
+      org: person.org || null,
       tone: person.tone,
       avatar_style: person.avatarStyle,
       skin_tone: person.skinTone,
       song_title: person.song?.title || null,
       song_artist: person.song?.artist || null,
+      stickers: person.stickers || [],
     })
     .select(
-      "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, deleted_at, created_at",
+      "id, owner_id, name, instagram, linkedin, about, org, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
     )
     .single();
   if (error) throw error;
@@ -252,6 +260,155 @@ const heroPolaroids = [
     author: "KL Meetup",
   },
 ];
+
+// splits text into words of per-letter spans for the rolling title animation
+function Letters({ text, start = 0 }) {
+  let n = start;
+  return text.split(" ").map((word, w) => (
+    <span className="word" key={w}>
+      {[...word].map((ch, i) => (
+        <span className="letter" key={i} style={{ "--i": n++ }}>
+          {ch}
+        </span>
+      ))}{" "}
+    </span>
+  ));
+}
+
+ // stickers beside the hero photos; drag to move, positions are kept in this browser
+const STICKER_SET = [
+  { id: "wand", src: "/stickers/wand.png", x: 0, y: -22, rot: -10 },
+  { id: "laptop-girl", src: "/stickers/laptop-girl.png", x: 98, y: 4, rot: 6 },
+  { id: "cat-heart", src: "/stickers/cat-heart.png", x: -1, y: 79, rot: 5 },
+  { id: "headphones", src: "/stickers/headphones.png", x: 30, y: 112, rot: -6 },
+  { id: "envelope", src: "/stickers/envelope.png", x: 98, y: 110, rot: 8 },
+  { id: "sleepy-girl", src: "/stickers/sleepy-girl.png", x: 76, y: 59, rot: -4 },
+];
+const STICKER_KEY = "girlcode-sticker-positions";
+
+// shared drag-and-drop board for stickers; editable boards commit their positions on drop
+function StickerBoard({ items, editable = false, onCommit, className }) {
+  const [pos, setPos] = useState(() => Object.fromEntries(items.map((s) => [s.id, { x: s.x, y: s.y }])));
+  const [order, setOrder] = useState(() => items.map((s) => s.id));
+  const [dragId, setDragId] = useState(null);
+  const drag = useRef(null);
+  const posRef = useRef(pos);
+  const setAll = (next) => {
+    posRef.current = next;
+    setPos(next);
+  };
+
+  const onDown = (e, item) => {
+    const box = e.currentTarget.parentElement.getBoundingClientRect();
+    const start = posRef.current[item.id];
+    drag.current = { id: item.id, sx: e.clientX, sy: e.clientY, x: start.x, y: start.y, w: box.width, h: box.height };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragId(item.id);
+    setOrder((o) => [...o.filter((id) => id !== item.id), item.id]);
+  };
+  const onMove = (e) => {
+    const d = drag.current;
+    if (!d) return;
+    const x = Math.min(100, Math.max(-2, d.x + ((e.clientX - d.sx) / d.w) * 100));
+    const y = Math.min(100, Math.max(-2, d.y + ((e.clientY - d.sy) / d.h) * 100));
+    setAll({ ...posRef.current, [d.id]: { x, y } });
+  };
+  const onUp = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    setDragId(null);
+    onCommit?.(items.map((s) => ({ id: s.id, x: posRef.current[s.id].x, y: posRef.current[s.id].y, rot: s.rot })));
+  };
+
+  return (
+    <div className={className}>
+      {items.map((item) => (
+        <img
+          key={item.id}
+          src={item.src}
+          alt=""
+          draggable={false}
+          className={`sticker${dragId === item.id ? " dragging" : ""}${editable ? "" : " static"}`}
+          style={{
+            left: `${pos[item.id].x}%`,
+            top: `${pos[item.id].y}%`,
+            zIndex: order.indexOf(item.id) + 3,
+            "--rot": `${item.rot}deg`,
+            pointerEvents: editable ? "auto" : "none",
+          }}
+          onPointerDown={editable ? (e) => onDown(e, item) : undefined}
+          onPointerMove={editable ? onMove : undefined}
+          onPointerUp={editable ? onUp : undefined}
+          onPointerCancel={editable ? onUp : undefined}
+        />
+      ))}
+    </div>
+  );
+}
+
+// hero stickers beside the photos; positions are kept in this browser
+function StickerLayer() {
+  const [items] = useState(() => {
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(STICKER_KEY)) || {};
+    } catch {
+      saved = {};
+    }
+    return STICKER_SET.map((s) => ({ ...s, ...saved[s.id] }));
+  });
+  const commit = (list) =>
+    localStorage.setItem(
+      STICKER_KEY,
+      JSON.stringify(Object.fromEntries(list.map((s) => [s.id, { x: s.x, y: s.y }]))),
+    );
+  return <StickerBoard className="sticker-layer" items={items} editable onCommit={commit} />;
+}
+
+// small flowers that pop up beside the about-us drawing on hover (pure svg, no emoji)
+const ABOUT_FLOWERS = [
+  { x: -14, y: 14, size: 30, rot: -12, delay: 0, tone: "pink" },
+  { x: -6, y: 58, size: 22, rot: 10, delay: 90, tone: "lilac" },
+  { x: 96, y: 8, size: 24, rot: 14, delay: 45, tone: "lilac" },
+  { x: 104, y: 46, size: 32, rot: -8, delay: 135, tone: "pink" },
+  { x: 90, y: 82, size: 22, rot: 20, delay: 180, tone: "soft" },
+];
+
+function Flower({ x, y, size, rot, delay, tone }) {
+  return (
+    <svg
+      className={`flower ${tone}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{ "--x": `${x}%`, "--y": `${y}%`, "--s": `${size}px`, "--r": `${rot}deg`, "--d": `${delay}ms` }}
+    >
+      <circle cx="12" cy="5.5" r="4.2" />
+      <circle cx="18.2" cy="10" r="4.2" />
+      <circle cx="15.8" cy="17.3" r="4.2" />
+      <circle cx="8.2" cy="17.3" r="4.2" />
+      <circle cx="5.8" cy="10" r="4.2" />
+      <circle className="core" cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle className="dot" cx="17.7" cy="6.6" r="1.1" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="li">
+      <path d="M5.2 8.6H2.4V21h2.8V8.6ZM3.8 7.3a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4ZM21.6 13.9c0-3.7-2-5.5-4.7-5.5a4.1 4.1 0 0 0-3.7 2v-1.8H10.4V21h2.8v-6.1c0-1.6.3-3.2 2.4-3.2 2 0 2.1 1.9 2.1 3.3V21h2.8l1.1-7.1Z" />
+    </svg>
+  );
+}
 
 function SocialLinks({ className }) {
   return (
@@ -306,6 +463,36 @@ function App() {
 
   // Tab State: 'wall' | 'gallery'
   const [activeTab, setActiveTab] = useState("wall");
+  // the sliding highlight behind the active tab pill
+  const tabRefs = { wall: useRef(null), gallery: useRef(null) };
+  const [pill, setPill] = useState({ x: 0, w: 0 });
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = tabRefs[activeTab].current;
+      if (el) setPill({ x: el.offsetLeft, w: el.offsetWidth });
+    };
+    measure();
+    // re-measure once the font has loaded or a tab changes size, the pill would otherwise keep a stale width
+    const observer = new ResizeObserver(measure);
+    Object.values(tabRefs).forEach((ref) => ref.current && observer.observe(ref.current));
+    document.fonts?.ready.then(measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [activeTab]);
+
+  // cross-fades the whole page when switching tabs, falls back to an instant swap
+  const switchTab = (tab) => {
+    if (tab === activeTab) return;
+    const swap = () => {
+      flushSync(() => setActiveTab(tab));
+      setQuery("");
+    };
+    if (document.startViewTransition) document.startViewTransition(swap);
+    else swap();
+  };
 
   // People State
   const [people, setPeople] = useState(() => {
@@ -374,7 +561,36 @@ function App() {
   const [avatarName, setAvatarName] = useState("");
   const [avatarTone, setAvatarTone] = useState("rose");
   const [avatarStyle, setAvatarStyle] = useState("star-bob");
+  const [avatarMode, setAvatarMode] = useState("avatar");
   const [avatarSkinTone, setAvatarSkinTone] = useState("fair");
+  const [cardStickers, setCardStickers] = useState([]);
+
+  const toggleCardSticker = (id) =>
+    setCardStickers((current) =>
+      current.includes(id)
+        ? current.filter((x) => x !== id)
+        : current.length < 2
+          ? [...current, id]
+          : current,
+    );
+
+  // saves a dragged card sticker; only the owner can change their own card when the backend is on
+  const saveCardStickers = async (personId, list) => {
+    const apply = (p) => (p.id === personId ? { ...p, stickers: list } : p);
+    setPeople((current) => current.map(apply));
+    setOwnedProfile((current) => (current ? apply(current) : current));
+    if (!backendEnabled) {
+      const key = "girlcode-socialwall-people";
+      localStorage.setItem(key, JSON.stringify(readStoredArray(key).map(apply)));
+      return;
+    }
+    const { error } = await authClient
+      .from("profiles")
+      .update({ stickers: list })
+      .eq("id", personId)
+      .eq("owner_id", session?.user?.id);
+    if (error) notify("couldn't save your sticker spot, try again");
+  };
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
@@ -431,10 +647,12 @@ function App() {
     }
     dismissFormError();
     setAvatarPreview("");
+    setAvatarMode("avatar");
     setAvatarName("");
     setAvatarTone("rose");
     setAvatarStyle("star-bob");
     setAvatarSkinTone("fair");
+    setCardStickers([]);
     formDialog.current.showModal();
   };
 
@@ -502,7 +720,7 @@ function App() {
         const { data, error } = await authClient
           .from("profiles")
           .select(
-            "id, owner_id, name, instagram, linkedin, about, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, deleted_at, created_at",
+            "id, owner_id, name, instagram, linkedin, about, org, tone, avatar_style, skin_tone, photo_url, song_title, song_artist, stickers, deleted_at, created_at",
           )
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -684,12 +902,17 @@ function App() {
         id: crypto.randomUUID(),
         name: data.get("name").trim(),
         ig: cleanIg(data.get("instagram")),
-        linkedin: cleanLinkedIn(data.get("linkedin")),
+        linkedin:
+          String(data.get("linkedin")).trim() === LINKEDIN_PREFIX
+            ? ""
+            : cleanLinkedIn(data.get("linkedin")),
         about: data.get("about").trim(),
+        org: data.get("org").trim(),
         tone: data.get("tone") || "rose",
         avatarStyle: data.get("avatarStyle") || "star-bob",
         skinTone: data.get("skinTone") || "fair",
         song,
+        stickers: cardStickers.map((id, i) => ({ id, x: i ? 14 : 82, y: i ? 66 : 12, rot: i ? -8 : 8 })),
         photo: "",
       };
     if (!person.name) return showFormError("Please add your name before saving.");
@@ -724,10 +947,12 @@ function App() {
       setPeople((current) => [...current, savedPerson]);
       setQuery("");
       setAvatarPreview("");
+      setAvatarMode("avatar");
       setAvatarName("");
       setAvatarTone("rose");
       setAvatarStyle("star-bob");
       setAvatarSkinTone("fair");
+      setCardStickers([]);
       dismissFormError();
       form.reset();
       formDialog.current.close();
@@ -824,25 +1049,26 @@ function App() {
 
           {/* Tab Switcher */}
           <nav className="nav-tabs" aria-label="Page navigation">
+            <span
+              className="nav-tab-indicator"
+              aria-hidden="true"
+              style={{ transform: `translateX(${pill.x}px)`, width: pill.w }}
+            />
             <button
               type="button"
+              ref={tabRefs.wall}
               className={`nav-tab-pill ${activeTab === "wall" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("wall");
-                setQuery("");
-              }}
+              onClick={() => switchTab("wall")}
             >
               ✦ Social Wall
             </button>
             <button
               type="button"
+              ref={tabRefs.gallery}
               className={`nav-tab-pill ${activeTab === "gallery" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("gallery");
-                setQuery("");
-              }}
+              onClick={() => switchTab("gallery")}
             >
-              📸 Event Gallery
+              Event Gallery
             </button>
           </nav>
 
@@ -922,20 +1148,20 @@ function App() {
                   <figcaption>better together ♡</figcaption>
                 </figure>
                 <div className="hero-copy">
-                  <div className="hero-mascot-badge">
-                    <img src="/logo.png" alt="Girl Code mascot" className="hero-mascot-img" />
-                    <div className="eyebrow">
-                      girls' vibe coding · kl
-                    </div>
-                  </div>
-                  <h1>
-                    we met <em>irl.</em>
+                  <h1 aria-label="we met irl. stay connected online.">
+                    <span aria-hidden="true">
+                      <Letters text="we met" />
+                      <em><Letters text="irl." start={6} /></em>
                     <br />
-                    stay{" "}
+                      <Letters text="stay" start={10} />
                     <span className="highlight-wrap">
-                      <span className="highlight">connected</span>
+                        <span className="highlight"><Letters text="connected" start={14} /></span>
+                        <span className="sparkle sparkle-1" aria-hidden="true">✦</span>
+                        <span className="sparkle sparkle-2" aria-hidden="true">✦</span>
+                        <span className="sparkle sparkle-3" aria-hidden="true">✦</span>
                     </span>{" "}
-                    <em>online.</em>
+                      <em><Letters text="online." start={23} /></em>
+                    </span>
                   </h1>
                   <p className="sub">
                     a tiny people wall for the girls in the room ♡
@@ -965,6 +1191,7 @@ function App() {
                   </button>
                   <figcaption>little ideas, big energy ✦</figcaption>
                 </figure>
+                <StickerLayer />
               </div>
               <TextLoop
                 text="Create ✦ Learn ✦ Build ✦ Support"
@@ -979,19 +1206,39 @@ function App() {
                 uppercase
                 color="#ffffff"
                 ribbon
-                ribbonColor="#c15bb8ff"
+                ribbonColor="#A83AC2ff"
                 ribbonWidth={66}
               />
-              <div className="hero-actions">
-                <button
-                  className="ghost"
-                  onClick={() => {
-                    setActiveTab("gallery");
-                    scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                >
-                  Event Gallery 📸
-                </button>
+            </section>
+
+            <section className="about-us" aria-labelledby="aboutUsTitle">
+              <div className="about-us-copy">
+                <div className="tiny">who are we?</div>
+                <h2 id="aboutUsTitle">
+                  <Letters text="a" />
+                  <span className="hl">
+                    <Letters text="girls-only" start={1} />
+                  </span>
+                  <Letters text="tech community" start={11} />
+                </h2>
+                <p>
+                  a <span className="hl">comfortable space</span> to learn tech with
+                  other girls. meet girls who are building too, make{" "}
+                  <span className="hl">new friends</span>, find{" "}
+                  <span className="hl">teammates</span> and learn together. we keep our
+                  meetups <span className="hl">small</span> so everyone gets heard, with
+                  guidance from <span className="hl">malaysian women in tech</span>.
+                </p>
+              </div>
+              <div className="about-us-art-wrap">
+                <img
+                  className="about-us-art"
+                  src="/stickers/about-laptop-girl.png"
+                  alt="hand-drawn girl coding on her laptop with a coffee"
+                />
+                {ABOUT_FLOWERS.map((flower, i) => (
+                  <Flower key={i} {...flower} />
+                ))}
               </div>
             </section>
 
@@ -1102,7 +1349,7 @@ function App() {
                             target="_blank"
                             rel="noreferrer"
                           >
-                            <span aria-hidden="true">♫</span>
+                            <span aria-hidden="true"></span>
                             <span>
                               <strong>{person.song.title}</strong>
                               {person.song.artist && (
@@ -1136,6 +1383,17 @@ function App() {
                           </span>
                         )}
                       </div>
+                      {person.stickers?.length > 0 && (
+                        <StickerBoard
+                          key={JSON.stringify(person.stickers)}
+                          className="card-sticker-layer"
+                          items={person.stickers
+                            .map((st) => ({ ...st, src: STICKER_SET.find((t) => t.id === st.id)?.src }))
+                            .filter((st) => st.src)}
+                          editable={!backendEnabled || ownedProfile?.id === person.id}
+                          onCommit={(list) => saveCardStickers(person.id, list)}
+                        />
+                      )}
                     </article>
                   );
                 })}
@@ -1156,7 +1414,7 @@ function App() {
               <div className="music-gallery-head">
                 <div>
                   <div className="tiny">our soundtrack</div>
-                  <h2 id="musicGalleryTitle">on repeat ♫</h2>
+                  <h2 id="musicGalleryTitle"><Letters text="on repeat" /></h2>
                 </div>
                 <p>little songs, recommended by the room</p>
               </div>
@@ -1185,9 +1443,12 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <p className="music-empty">
-                  The first song recommendation will appear here ♫
-                </p>
+                <div className="music-empty">
+                  <span className="vinyl" aria-hidden="true">
+                    <i />
+                  </span>
+                  <p>The first song recommendation will appear here</p>
+                </div>
               )}
             </section>
           </div>
@@ -1258,7 +1519,7 @@ function App() {
 
             <div className="auth-success-body">
               <div className="auth-success-badge" aria-hidden="true">
-                <span className="auth-success-badge-icon">💌</span>
+                <span className="auth-success-badge-icon"></span>
               </div>
               <p className="auth-success-desc">
                 We sent a one-time sign-in link to:
@@ -1408,7 +1669,27 @@ function App() {
             <span>
               linkedin <i>optional</i>
             </span>
-            <input name="linkedin" placeholder="linkedin.com/in/yourname" />
+            <input
+              name="linkedin"
+              defaultValue={LINKEDIN_PREFIX}
+              onFocus={(e) => {
+                const input = e.target;
+                if (input.value === LINKEDIN_PREFIX)
+                  requestAnimationFrame(() =>
+                    input.setSelectionRange(input.value.length, input.value.length),
+                  );
+              }}
+            />
+          </label>
+          <label>
+            <span>
+              education / company <i>optional</i>
+            </span>
+            <input
+              name="org"
+              maxLength="60"
+              placeholder="e.g. Sunway University or Grab"
+            />
           </label>
           <label>
             <span>come talk to me about...</span>
@@ -1445,61 +1726,36 @@ function App() {
               ))}
             </div>
           </fieldset>
-          <fieldset className="avatar-picker">
-            <legend>choose your Girl Code avatar</legend>
-            <div className="avatar-picker-grid">
-              {AVATAR_STYLES.map((style) => (
+          <fieldset className="avatar-mode-picker">
+            <legend>your profile pic</legend>
+            <div className="avatar-mode-options">
+              {[
+                ["photo", "upload my own photo"],
+                ["avatar", "use a Girl Code avatar"],
+              ].map(([mode, label]) => (
                 <label
-                  className={`avatar-option${avatarStyle === style.id ? " selected" : ""}`}
-                  key={style.id}
+                  className={`avatar-mode-option${avatarMode === mode ? " selected" : ""}`}
+                  key={mode}
                 >
                   <input
                     type="radio"
-                    name="avatarStyle"
-                    value={style.id}
-                    checked={avatarStyle === style.id}
-                    onChange={() => setAvatarStyle(style.id)}
+                    name="avatarMode"
+                    value={mode}
+                    checked={avatarMode === mode}
+                    onChange={() => {
+                      setAvatarMode(mode);
+                      if (mode === "avatar") setAvatarPreview("");
+                    }}
                   />
-                  <Avatar
-                    className="avatar-option-image"
-                    tone={avatarTone}
-                    avatarStyle={style.id}
-                    skinTone={avatarSkinTone}
-                  />
-                  <span>{style.label}</span>
+                  <span>{label}</span>
                 </label>
               ))}
             </div>
           </fieldset>
-          <fieldset className="skin-tone-picker">
-            <legend>choose your skin tone</legend>
-            <div className="skin-tone-options">
-              {SKIN_TONES.map((skin) => (
-                <label
-                  className={`skin-tone-option${avatarSkinTone === skin.id ? " selected" : ""}`}
-                  key={skin.id}
-                >
-                  <input
-                    type="radio"
-                    name="skinTone"
-                    value={skin.id}
-                    checked={avatarSkinTone === skin.id}
-                    onChange={() => setAvatarSkinTone(skin.id)}
-                  />
-                  <Avatar
-                    className="skin-tone-preview"
-                    tone={avatarTone}
-                    avatarStyle={avatarStyle}
-                    skinTone={skin.id}
-                  />
-                  <span>{skin.label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          {avatarMode === "photo" ? (
           <div className="avatar-upload-field">
             <span className="avatar-label">
-              use your own photo <i>optional</i>
+              upload your photo
             </span>
             <div className="avatar-upload-row">
               <Avatar
@@ -1553,6 +1809,82 @@ function App() {
               </div>
             </div>
           </div>
+          ) : (
+            <>
+          <fieldset className="avatar-picker">
+            <legend>choose your Girl Code avatar</legend>
+            <div className="avatar-picker-grid">
+              {AVATAR_STYLES.map((style) => (
+                <label
+                  className={`avatar-option${avatarStyle === style.id ? " selected" : ""}`}
+                  key={style.id}
+                >
+                  <input
+                    type="radio"
+                    name="avatarStyle"
+                    value={style.id}
+                    checked={avatarStyle === style.id}
+                    onChange={() => setAvatarStyle(style.id)}
+                  />
+                  <Avatar
+                    className="avatar-option-image"
+                    tone={avatarTone}
+                    avatarStyle={style.id}
+                    skinTone={avatarSkinTone}
+                  />
+                  <span>{style.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="skin-tone-picker">
+            <legend>choose your skin tone</legend>
+            <div className="skin-tone-options">
+              {SKIN_TONES.map((skin) => (
+                <label
+                  className={`skin-tone-option${avatarSkinTone === skin.id ? " selected" : ""}`}
+                  key={skin.id}
+                >
+                  <input
+                    type="radio"
+                    name="skinTone"
+                    value={skin.id}
+                    checked={avatarSkinTone === skin.id}
+                    onChange={() => setAvatarSkinTone(skin.id)}
+                  />
+                  <Avatar
+                    className="skin-tone-preview"
+                    tone={avatarTone}
+                    avatarStyle={avatarStyle}
+                    skinTone={skin.id}
+                  />
+                  <span>{skin.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+            </>
+          )}
+          <fieldset className="card-sticker-picker">
+            <legend>pick up to 2 stickers for your card</legend>
+            <div className="card-sticker-options">
+              {STICKER_SET.map((sticker) => {
+                const picked = cardStickers.includes(sticker.id);
+                return (
+                  <button
+                    type="button"
+                    key={sticker.id}
+                    className={`card-sticker-option${picked ? " selected" : ""}`}
+                    aria-pressed={picked}
+                    disabled={!picked && cardStickers.length >= 2}
+                    onClick={() => toggleCardSticker(sticker.id)}
+                  >
+                    <img src={sticker.src} alt={sticker.id.replace(/-/g, " ")} draggable={false} />
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
           <p className="privacy-note">
             Your profile details and song will be visible to people who visit
             this wall. Please do not include private information.
@@ -1594,7 +1926,6 @@ function App() {
               <div className="detail-copy">
                 <span className="detail-field-label">NAME</span>
                 <h2 id="detailName">{activePerson.name}</h2>
-                <p className="detail-handle">@{activePerson.ig}</p>
                 <p className="detail-about">
                   {activePerson.about || "say hi if you see me around ♡"}
                 </p>
@@ -1606,7 +1937,7 @@ function App() {
                     rel="noreferrer"
                     aria-label={`Search Spotify for ${activePerson.song.title}${activePerson.song.artist ? ` by ${activePerson.song.artist}` : ""}`}
                   >
-                    <span className="detail-song-icon" aria-hidden="true">♫</span>
+                    <span className="detail-song-icon" aria-hidden="true"></span>
                     <span className="detail-song-copy">
                       <span className="detail-song-label">ON REPEAT</span>
                       <strong>{activePerson.song.title}</strong>
@@ -1645,11 +1976,6 @@ function App() {
             </div>
             <section className="guestbook">
               <h3>leave a little note ♡</h3>
-              <p className="note-help privacy-note">
-                Notes are saved in this browser only; they are not sent to the
-                person. Anyone using this browser may be able to see them, so
-                please do not include private information.
-              </p>
               <ul className="message-list" aria-live="polite">
                 {messages.filter((m) => m?.personId === activePerson.id)
                   .length ? (
