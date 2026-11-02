@@ -81,7 +81,7 @@ export default function AddMemoryModal({
       setPhotoPreview("");
       setError("");
       dialogRef.current?.close();
-      notify("memory pinned to the scrapbook 📸✦");
+      notify("memory pinned to the scrapbook ✦");
     } catch {
       setError("Couldn't save memory. Please try again.");
     } finally {
@@ -107,7 +107,7 @@ export default function AddMemoryModal({
             <img src="/logo.png" alt="Girl Code logo" className="sheet-dialog-logo" />
             <div>
               <div className="tiny">share an irl memory</div>
-              <h2 id="memoryModalTitle">pin a polaroid 📸</h2>
+              <h2 id="memoryModalTitle">pin a polaroid</h2>
             </div>
           </div>
           <button
@@ -162,7 +162,7 @@ export default function AddMemoryModal({
                   onChange={handlePhotoChange}
                 />
                 <div className="upload-prompt">
-                  <span className="upload-icon">📷</span>
+                  <span className="upload-icon"></span>
                   <strong>upload an event snapshot</strong>
                   <small>candid photos, laptop screens, smiles, iced drinks</small>
                 </div>
@@ -186,17 +186,17 @@ export default function AddMemoryModal({
         <label>
           <span>meetup event</span>
           <select name="eventDate" className="memory-select" defaultValue="12.09.2026">
-            <option value="12.09.2026">🗓 12.09.2026 — KL Meetup</option>
+            <option value="12.09.2026">12.09.2026 — KL Meetup</option>
           </select>
         </label>
 
         <label>
           <span>category vibe</span>
           <select name="tag" className="memory-select" defaultValue="Coding & Vibe">
-            <option value="Group Love">♡ Group Love</option>
-            <option value="Coding & Vibe">✦ Coding & Vibe</option>
-            <option value="Show & Tell">✨ Show & Tell</option>
-            <option value="Coffee & Hangout">🧋 Coffee & Hangout</option>
+            <option value="Group Love">Group Love</option>
+            <option value="Coding & Vibe">Coding & Vibe</option>
+            <option value="Show & Tell">Show & Tell</option>
+            <option value="Coffee & Hangout">Coffee & Hangout</option>
           </select>
         </label>
 
