@@ -1742,7 +1742,7 @@ function App() {
                   className="sheet-dialog-logo"
                 />
                 <div>
-                  <div className="tiny">welcome to the wall</div>
+                  <div className="tiny">welcome to GirlCode!</div>
                   <h2 id="authTitle">{authMode === "signup" ? "create your account" : "log in"}</h2>
                 </div>
               </div>
