@@ -1529,21 +1529,60 @@ function App() {
           </div>
         )}
 
-        <footer>
-          <div className="footer-brand">
-            <img src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
-            <span>
-              {activeTab === "wall"
-                ? "made for one room, one afternoon, and a lot of new mutuals ✦"
-                : "girls' vibe coding moments captured with love ♡"}
-            </span>
+        <footer className="site-footer">
+          <div className="footer-top">
+            <div className="footer-brand">
+              <img src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
+              <div className="footer-brand-text">
+                <strong>GirlCode</strong>
+                <span>Made for girls who build</span>
+              </div>
+            </div>
+            <div className="footer-cols">
+              <div className="footer-col">
+                <h4>Company</h4>
+                <ul>
+                  <li>Home</li>
+                  <li>Our Story</li>
+                  <li>Founders</li>
+                  <li>Events</li>
+                  <li>Community</li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Connect</h4>
+                <ul>
+                  <li>LinkedIn</li>
+                  <li>Instagram</li>
+                  <li>WhatsApp</li>
+                  <li>Newsletter</li>
+                  <li>Partners</li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Support</h4>
+                <ul>
+                  <li>Terms of Service</li>
+                  <li>Privacy Policy</li>
+                  <li>Code of Conduct</li>
+                  <li>Contact Us</li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <SocialLinks className="footer-socials" />
-          <button
-            onClick={activeTab === "wall" ? openAddForm : openAddMemory}
-          >
-            {activeTab === "wall" ? "add yourself ↗" : "share memory ↗"}
-          </button>
+          <div className="footer-watermark" aria-hidden="true">GirlCode</div>
+          <div className="footer-bar">
+            <span>&copy; 2026 GirlCode. All rights reserved.</span>
+            <div className="footer-bar-actions">
+              <button
+                type="button"
+                onClick={activeTab === "wall" ? openAddForm : openAddMemory}
+              >
+                {activeTab === "wall" ? "add yourself ↗" : "share memory ↗"}
+              </button>
+              <SocialLinks className="footer-socials" />
+            </div>
+          </div>
         </footer>
       </main>
 
