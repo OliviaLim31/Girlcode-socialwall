@@ -4495,3 +4495,23 @@ footer.site-footer { background: url("/footer-bg.jpg") center bottom / 100% auto
 @media (max-width: 860px) {
   footer.site-footer { background: url("/footer-bg.jpg") 26% calc(100% - 70px) / auto 52% no-repeat, linear-gradient(#fefefe 0 70%, #8f6fd0) }
 }
+
+/* nav: log in / sign up */
+.nav-auth-group { display: flex; align-items: center; gap: 8px; flex: none }
+.nav-login, .nav-signup { font: inherit; font-weight: 700; font-size: 14px; border-radius: 999px; padding: 9px 18px; white-space: nowrap; cursor: pointer }
+.nav-login { background: rgba(255, 255, 255, .24); color: #fff; border: 1px solid rgba(255, 255, 255, .5); backdrop-filter: blur(10px) saturate(1.4); -webkit-backdrop-filter: blur(10px) saturate(1.4) }
+.nav-login:hover { background: rgba(255, 255, 255, .4) }
+.nav-signup { background: #fff; color: var(--deep-plum); border: 1px solid #fff; box-shadow: 0 4px 14px rgba(60, 40, 150, .25) }
+.nav-signup:hover { transform: translateY(-1px) }
+.nav-login:disabled, .nav-signup:disabled { opacity: .6; cursor: progress }
+.nav-auth-short { display: none }
+@media (max-width: 620px) {
+  .nav-login, .nav-signup { font-size: 12.5px; padding: 8px 12px }
+  .nav-auth-group { order: 2; gap: 6px }
+  .nav-auth.is-signed-in .nav-add-text { display: none }
+  .nav-auth.is-signed-in .nav-auth-short { display: inline-flex }
+}
+@media (max-width: 380px) {
+  .nav-login { padding: 8px 10px }
+  .nav-signup { padding: 8px 10px }
+}

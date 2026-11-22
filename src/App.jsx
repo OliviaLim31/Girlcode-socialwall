@@ -466,12 +466,14 @@ const NavIcon = ({ name }) => {
   if (name === "wall") return <svg {...p}><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z" /></svg>;
   if (name === "gallery") return <svg {...p}><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="M21 16l-5-5-8 9" /></svg>;
   if (name === "search") return <svg {...p}><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>;
+  if (name === "user") return <svg {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>;
   return <svg {...p}><path d="M12 5v14M5 12h14" /></svg>;
 };
 
 function App() {
   const [openFounder, setOpenFounder] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
   const authDialog = useRef(null);
   const formDialog = useRef(null);
   const detailDialog = useRef(null);
@@ -633,7 +635,8 @@ function App() {
     setFormError("");
   };
 
-  const openSignIn = (notice = "") => {
+  const openSignIn = (notice = "", mode = "login") => {
+    setAuthMode(mode);
     setAuthError("");
     setAuthNotice(notice);
     setAuthSuccessEmail("");
@@ -1129,28 +1132,38 @@ function App() {
             )}
           </div>
 
-          <button
-            className="nav-add"
-            onClick={activeTab === "wall" ? openAddForm : openAddMemory}
-          >
-            <span className="nav-add-plus" aria-hidden="true"><NavIcon name="add" /></span>
-            <span className="nav-add-text">{activeTab === "wall" ? "+ add me" : "+ share memory"}</span>
-          </button>
-          {backendEnabled && (
+          {backendEnabled && session ? (
             <button
-              className={`nav-add nav-auth${session ? " is-signed-in" : ""}`}
+              className="nav-add nav-auth is-signed-in"
               type="button"
-              onClick={session ? signOut : () => openSignIn()}
-              disabled={!authReady}
-              aria-label={
-                session
-                  ? "Signed in. Click to sign out."
-                  : "Sign in"
-              }
-              title={session ? "Click to sign out" : undefined}
+              onClick={signOut}
+              title="Click to sign out"
+              aria-label="Signed in. Click to sign out."
             >
-              {!authReady ? "checking…" : session ? "signed in" : "sign in"}
+              <span className="nav-add-text">sign out</span>
+              <span className="nav-auth-short" aria-hidden="true">
+                <NavIcon name="user" />
+              </span>
             </button>
+          ) : (
+            <div className="nav-auth-group">
+              <button
+                className="nav-login"
+                type="button"
+                disabled={backendEnabled && !authReady}
+                onClick={() => openSignIn("", "login")}
+              >
+                Log in
+              </button>
+              <button
+                className="nav-signup"
+                type="button"
+                disabled={backendEnabled && !authReady}
+                onClick={() => openSignIn("", "signup")}
+              >
+                Sign up
+              </button>
+            </div>
           )}
         </header>
 
@@ -1664,7 +1677,7 @@ function App() {
                 />
                 <div>
                   <div className="tiny">welcome to the wall</div>
-                  <h2 id="authTitle">sign in ♡</h2>
+                  <h2 id="authTitle">{authMode === "signup" ? "create your account ♡" : "log in ♡"}</h2>
                 </div>
               </div>
               <button
@@ -1677,8 +1690,9 @@ function App() {
               </button>
             </div>
             <p className="auth-help">
-              Enter your email and we’ll send you a one-time sign-in link. No
-              password needed.
+              {authMode === "signup"
+                ? "Enter your email and we’ll send you a link that creates your account and signs you in. No password needed."
+                : "Enter your email and we’ll send you a one-time sign-in link. No password needed."}
             </p>
             <label>
               <span>email address</span>
@@ -1703,7 +1717,7 @@ function App() {
               </p>
             )}
             <button className="submit" type="submit" disabled={authLoading}>
-              {authLoading ? "sending link…" : "email me a sign-in link"}
+              {authLoading ? "sending link…" : authMode === "signup" ? "email me a sign-up link" : "email me a sign-in link"}
             </button>
           </form>
         )}
