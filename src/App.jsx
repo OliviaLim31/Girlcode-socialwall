@@ -466,6 +466,7 @@ const NavIcon = ({ name }) => {
   if (name === "wall") return <svg {...p}><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z" /></svg>;
   if (name === "gallery") return <svg {...p}><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="M21 16l-5-5-8 9" /></svg>;
   if (name === "search") return <svg {...p}><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>;
+  if (name === "music") return <svg {...p}><path d="M9 18V6l11-2v12" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="17.5" cy="16" r="2.5" /></svg>;
   if (name === "user") return <svg {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>;
   return <svg {...p}><path d="M12 5v14M5 12h14" /></svg>;
 };
@@ -474,6 +475,17 @@ function App() {
   const [openFounder, setOpenFounder] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [authMode, setAuthMode] = useState("login");
+  const [authPassword, setAuthPassword] = useState("");
+  const [musicActive, setMusicActive] = useState(false);
+  // FRONTEND-ONLY placeholder login, used when no Supabase backend is configured.
+  // TODO(backend): remove once real auth is connected; `session` then drives loggedIn.
+  const [demoUser, setDemoUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("girlcode-demo-user")) || null;
+    } catch {
+      return null;
+    }
+  });
   const authDialog = useRef(null);
   const formDialog = useRef(null);
   const detailDialog = useRef(null);
@@ -481,14 +493,16 @@ function App() {
   const memoryDialog = useRef(null);
   const addForm = useRef(null);
 
+  const [session, setSession] = useState(null);
   // Tab State: 'wall' | 'gallery'
   const [activeTab, setActiveTab] = useState("wall");
   // the sliding highlight behind the active tab pill
   const tabRefs = { wall: useRef(null), gallery: useRef(null) };
-  const [pill, setPill] = useState({ x: 0, w: 0 });
+    const [pill, setPill] = useState({ x: 0, w: 0 });
   useLayoutEffect(() => {
     const measure = () => {
-      const el = tabRefs[activeTab].current;
+      const key = activeTab === "gallery" ? "gallery" : musicActive ? "wall" : null;
+      const el = key ? tabRefs[key].current : null;
       if (el) setPill({ x: el.offsetLeft, w: el.offsetWidth });
     };
     measure();
@@ -501,7 +515,7 @@ function App() {
       observer.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [activeTab]);
+  }, [activeTab, musicActive, Boolean(session || demoUser)]);
 
   // cross-fades the whole page when switching tabs, falls back to an instant swap
   const switchTab = (tab) => {
@@ -561,7 +575,6 @@ function App() {
   const [query, setQuery] = useState("");
   const [selectedTone, setSelectedTone] = useState("all");
   const [toast, setToast] = useState("");
-  const [session, setSession] = useState(null);
   const [authReady, setAuthReady] = useState(!backendEnabled);
   const [profilesLoading, setProfilesLoading] = useState(backendEnabled);
   const [profileLoadError, setProfileLoadError] = useState("");
@@ -633,6 +646,77 @@ function App() {
   const dismissFormError = () => {
     window.clearTimeout(showFormError.timer);
     setFormError("");
+  };
+
+  const loggedIn = Boolean(session) || Boolean(demoUser);
+
+  const goMusic = () => {
+    setMusicActive(true);
+    if (activeTab !== "wall") flushSync(() => setActiveTab("wall"));
+    window.setTimeout(() => {
+      document.getElementById("music")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
+  const finishDemoLogin = (email) => {
+    // TODO(backend): replace with real session handling.
+    const user = { email: email || "guest@girlcode.local" };
+    localStorage.setItem("girlcode-demo-user", JSON.stringify(user));
+    setDemoUser(user);
+    setAuthPassword("");
+    authDialog.current?.close();
+    notify("you're logged in");
+  };
+
+  const submitAuth = async (event) => {
+    event.preventDefault();
+    const email = authEmail.trim();
+    if (!email) {
+      setAuthError("Please enter your email address.");
+      return;
+    }
+    if (authPassword.length < 6) {
+      setAuthError("Password must be at least 6 characters.");
+      return;
+    }
+    setAuthError("");
+    if (!authClient) {
+      finishDemoLogin(email);
+      return;
+    }
+    setAuthLoading(true);
+    try {
+      if (authMode === "signup") {
+        const { data, error } = await authClient.auth.signUp({
+          email,
+          password: authPassword,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+        if (!data.session) setAuthSuccessEmail(email);
+      } else {
+        const { error } = await authClient.auth.signInWithPassword({ email, password: authPassword });
+        if (error) throw error;
+      }
+      setAuthPassword("");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const continueWithGoogle = async () => {
+    setAuthError("");
+    if (!authClient) {
+      finishDemoLogin("google.user@gmail.com");
+      return;
+    }
+    const { error } = await authClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) setAuthError(error.message);
   };
 
   const openSignIn = (notice = "", mode = "login") => {
@@ -822,7 +906,16 @@ function App() {
   };
 
   const signOut = async () => {
-    if (!authClient) return;
+    if (!authClient) {
+      localStorage.removeItem("girlcode-demo-user");
+      setDemoUser(null);
+      setActiveTab("wall");
+      setMusicActive(false);
+      notify("you've signed out");
+      return;
+    }
+    setActiveTab("wall");
+    setMusicActive(false);
     try {
       const { error } = await authClient.auth.signOut();
       if (error) throw error;
@@ -1068,71 +1161,43 @@ function App() {
             />
           </a>
 
-          {/* Tab Switcher */}
-          <nav className="nav-tabs" aria-label="Page navigation">
-            <span
-              className="nav-tab-indicator"
-              aria-hidden="true"
-              style={{ transform: `translateX(${pill.x}px)`, width: pill.w }}
-            />
-            <button
-              type="button"
-              ref={tabRefs.wall}
-              className={`nav-tab-pill ${activeTab === "wall" ? "active" : ""}`}
-              onClick={() => switchTab("wall")}
-            >
-              <NavIcon name="wall" />
-              <span className="nav-label"><span className="nav-spark">✦ </span>Social Wall</span>
-            </button>
-            <button
-              type="button"
-              ref={tabRefs.gallery}
-              className={`nav-tab-pill ${activeTab === "gallery" ? "active" : ""}`}
-              onClick={() => switchTab("gallery")}
-            >
-              <NavIcon name="gallery" />
-              <span className="nav-label">Event Gallery</span>
-            </button>
-          </nav>
-
-          <button
-            type="button"
-            className={`nav-search-toggle${searchOpen ? " active" : ""}`}
-            aria-label="Search"
-            aria-expanded={searchOpen}
-            onClick={() => setSearchOpen((v) => !v)}
-          >
-            <NavIcon name="search" />
-          </button>
-
-          <div className={`site-search${searchOpen ? " open" : ""}`}>
-            <span aria-hidden="true">⌕</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              type="search"
-              placeholder={
-                activeTab === "wall"
-                  ? "find someone or vibe..."
-                  : "search memories or tags..."
-              }
-              autoComplete="off"
-              aria-label="Search"
-            />
-            {query && (
+          {/* Sub tabs: only after login */}
+          {loggedIn && (
+            <nav className="nav-tabs" aria-label="Page navigation">
+              <span
+                className="nav-tab-indicator"
+                aria-hidden="true"
+                style={{
+                  transform: `translateX(${pill.x}px)`,
+                  width: pill.w,
+                  opacity: activeTab === "gallery" || musicActive ? 1 : 0,
+                }}
+              />
               <button
                 type="button"
-                className="search-clear-btn"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                title="Clear search"
+                ref={tabRefs.gallery}
+                className={`nav-tab-pill ${activeTab === "gallery" ? "active" : ""}`}
+                onClick={() => {
+                  setMusicActive(false);
+                  switchTab("gallery");
+                }}
               >
-                ×
+                <NavIcon name="gallery" />
+                <span className="nav-label">Photos</span>
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                ref={tabRefs.wall}
+                className={`nav-tab-pill ${activeTab === "wall" && musicActive ? "active" : ""}`}
+                onClick={goMusic}
+              >
+                <NavIcon name="music" />
+                <span className="nav-label">Music</span>
+              </button>
+            </nav>
+          )}
 
-          {backendEnabled && session ? (
+          {loggedIn ? (
             <button
               className="nav-add nav-auth is-signed-in"
               type="button"
@@ -1466,6 +1531,7 @@ function App() {
             )}
 
             <section
+              id="music"
               className="music-gallery"
               aria-labelledby="musicGalleryTitle"
             >
@@ -1637,7 +1703,7 @@ function App() {
                 <span className="auth-success-badge-icon"></span>
               </div>
               <p className="auth-success-desc">
-                We sent a one-time sign-in link to:
+                We sent a confirmation link to:
               </p>
               <div className="auth-success-email">
                 <span>{authSuccessEmail}</span>
@@ -1667,7 +1733,7 @@ function App() {
             </div>
           </div>
         ) : (
-          <form className="sheet" onSubmit={sendSignInLink}>
+          <form className="sheet" onSubmit={submitAuth}>
             <div className="sheet-head">
               <div className="sheet-head-left">
                 <img
@@ -1677,7 +1743,7 @@ function App() {
                 />
                 <div>
                   <div className="tiny">welcome to the wall</div>
-                  <h2 id="authTitle">{authMode === "signup" ? "create your account ♡" : "log in ♡"}</h2>
+                  <h2 id="authTitle">{authMode === "signup" ? "create your account" : "log in"}</h2>
                 </div>
               </div>
               <button
@@ -1689,11 +1755,16 @@ function App() {
                 ×
               </button>
             </div>
-            <p className="auth-help">
-              {authMode === "signup"
-                ? "Enter your email and we’ll send you a link that creates your account and signs you in. No password needed."
-                : "Enter your email and we’ll send you a one-time sign-in link. No password needed."}
-            </p>
+            <button type="button" className="google-btn" onClick={continueWithGoogle}>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.2a5.3 5.3 0 0 1-2.3 3.5v2.9h3.7c2.2-2 3.4-5 3.4-8.5z" />
+                <path fill="#34A853" d="M12 24c3.1 0 5.7-1 7.6-2.8l-3.7-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.7H1.8v3A12 12 0 0 0 12 24z" />
+                <path fill="#FBBC05" d="M5.6 14.7a7.2 7.2 0 0 1 0-4.6v-3H1.8a12 12 0 0 0 0 10.6l3.8-3z" />
+                <path fill="#EA4335" d="M12 4.8c1.7 0 3.2.6 4.4 1.7l3.3-3.3A12 12 0 0 0 1.8 7.1l3.8 3C6.5 6.8 9 4.8 12 4.8z" />
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+            <div className="auth-divider"><span>or</span></div>
             <label>
               <span>email address</span>
               <input
@@ -1704,6 +1775,19 @@ function App() {
                 value={authEmail}
                 onChange={(event) => setAuthEmail(event.target.value)}
                 placeholder="you@example.com"
+              />
+            </label>
+            <label>
+              <span>password</span>
+              <input
+                type="password"
+                name="password"
+                autoComplete={authMode === "signup" ? "new-password" : "current-password"}
+                required
+                minLength={6}
+                value={authPassword}
+                onChange={(event) => setAuthPassword(event.target.value)}
+                placeholder="at least 6 characters"
               />
             </label>
             {authNotice && (
@@ -1717,8 +1801,14 @@ function App() {
               </p>
             )}
             <button className="submit" type="submit" disabled={authLoading}>
-              {authLoading ? "sending link…" : authMode === "signup" ? "email me a sign-up link" : "email me a sign-in link"}
+              {authLoading ? "please wait…" : authMode === "signup" ? "Sign up" : "Log in"}
             </button>
+            <p className="auth-switch">
+              {authMode === "signup" ? "Already have an account?" : "New here?"}{" "}
+              <button type="button" onClick={() => setAuthMode(authMode === "signup" ? "login" : "signup")}>
+                {authMode === "signup" ? "Log in" : "Sign up"}
+              </button>
+            </p>
           </form>
         )}
       </AnimatedDialog>
