@@ -4485,3 +4485,4 @@ footer.site-footer {
   .footer-watermark { top: 40% }
 }
 @media (max-width: 860px) { .footer-watermark { font-size: 21vw; top: 38% } }
+@media (max-width: 600px) { .footer-watermark { display: none } }
