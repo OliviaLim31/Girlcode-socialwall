@@ -63,6 +63,17 @@ const initialProfiles = [
   ...seedProfiles.filter((profile) => profile.id !== "seed-2"),
 ];
 
+const FOUNDER_DETAILS = [
+  { name: "Zhi Wei", fullName: "Tan Zhi Wei", role: "Founder", photo: "/founders/zhiwei.webp" },
+  { name: "Edwina", fullName: "Edwina Hon", role: "Co-founder", photo: "/founders/edwina.webp" },
+  { name: "Hana", fullName: "Hana Tang", role: "Co-founder", photo: "/founders/hana.webp" },
+  { name: "Olivia", fullName: "Olivia Lim", role: "Co-founder", photo: "/founders/olivia.webp" },
+];
+const founders = FOUNDER_DETAILS.map((d) => ({
+  ...seedProfiles.find((p) => p.name === d.name),
+  ...d,
+}));
+
 const tones = ["rose", "olive", "lilac", "cream", "blue"];
 const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").replace(
   /\/$/,
@@ -277,14 +288,11 @@ function Letters({ text, start = 0 }) {
 
  // stickers beside the hero photos; drag to move, positions are kept in this browser
 const STICKER_SET = [
-  { id: "wand", src: "/stickers/wand.png", x: 0, y: -22, rot: -10 },
-  { id: "laptop-girl", src: "/stickers/laptop-girl.png", x: 98, y: 4, rot: 6 },
-  { id: "cat-heart", src: "/stickers/cat-heart.png", x: -1, y: 79, rot: 5 },
-  { id: "headphones", src: "/stickers/headphones.png", x: 30, y: 112, rot: -6 },
-  { id: "envelope", src: "/stickers/envelope.png", x: 98, y: 110, rot: 8 },
-  { id: "sleepy-girl", src: "/stickers/sleepy-girl.png", x: 76, y: 59, rot: -4 },
+  { id: "wand", src: "/stickers/wand.png", x: 2, y: -6, rot: -10 },
+  { id: "cat-heart", src: "/stickers/cat-heart.png", x: 6, y: 92, rot: 5 },
+  { id: "envelope", src: "/stickers/envelope.png", x: 96, y: 108, rot: 8 },
 ];
-const STICKER_KEY = "girlcode-sticker-positions";
+const STICKER_KEY = "girlcode-sticker-positions-v2";
 
 // shared drag-and-drop board for stickers; editable boards commit their positions on drop
 function StickerBoard({ items, editable = false, onCommit, className }) {
@@ -453,7 +461,17 @@ function SocialLinks({ className }) {
   );
 }
 
+const NavIcon = ({ name }) => {
+  const p = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  if (name === "wall") return <svg {...p}><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z" /></svg>;
+  if (name === "gallery") return <svg {...p}><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="M21 16l-5-5-8 9" /></svg>;
+  if (name === "search") return <svg {...p}><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>;
+  return <svg {...p}><path d="M12 5v14M5 12h14" /></svg>;
+};
+
 function App() {
+  const [openFounder, setOpenFounder] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const authDialog = useRef(null);
   const formDialog = useRef(null);
   const detailDialog = useRef(null);
@@ -1060,7 +1078,8 @@ function App() {
               className={`nav-tab-pill ${activeTab === "wall" ? "active" : ""}`}
               onClick={() => switchTab("wall")}
             >
-              ✦ Social Wall
+              <NavIcon name="wall" />
+              <span className="nav-label"><span className="nav-spark">✦ </span>Social Wall</span>
             </button>
             <button
               type="button"
@@ -1068,11 +1087,22 @@ function App() {
               className={`nav-tab-pill ${activeTab === "gallery" ? "active" : ""}`}
               onClick={() => switchTab("gallery")}
             >
-              Event Gallery
+              <NavIcon name="gallery" />
+              <span className="nav-label">Event Gallery</span>
             </button>
           </nav>
 
-          <div className="site-search">
+          <button
+            type="button"
+            className={`nav-search-toggle${searchOpen ? " active" : ""}`}
+            aria-label="Search"
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen((v) => !v)}
+          >
+            <NavIcon name="search" />
+          </button>
+
+          <div className={`site-search${searchOpen ? " open" : ""}`}>
             <span aria-hidden="true">⌕</span>
             <input
               value={query}
@@ -1103,7 +1133,8 @@ function App() {
             className="nav-add"
             onClick={activeTab === "wall" ? openAddForm : openAddMemory}
           >
-            {activeTab === "wall" ? "+ add me" : "+ share memory"}
+            <span className="nav-add-plus" aria-hidden="true"><NavIcon name="add" /></span>
+            <span className="nav-add-text">{activeTab === "wall" ? "+ add me" : "+ share memory"}</span>
           </button>
           {backendEnabled && (
             <button
@@ -1127,26 +1158,6 @@ function App() {
           <div className="view-container view-fade-in">
             <section className="hero">
               <div className="hero-intro">
-                <figure className="hero-polaroid hero-polaroid-left">
-                  <button
-                    type="button"
-                    className="polaroid-open"
-                    aria-label="Enlarge group photo"
-                    aria-haspopup="dialog"
-                    onClick={() => openLightbox(heroPolaroids, 0)}
-                  >
-                    <img
-                      src="/events/12.09.2026/hero-group.jpg"
-                      alt="Group photo of all girls at the Girls Only Vibe Code Session"
-                      width="5712"
-                      height="4284"
-                    />
-                    <span className="photo-zoom-hint" aria-hidden="true">
-                      view photo ↗
-                    </span>
-                  </button>
-                  <figcaption>better together ♡</figcaption>
-                </figure>
                 <div className="hero-copy">
                   <h1 aria-label="we met irl. stay connected online.">
                     <span aria-hidden="true">
@@ -1171,6 +1182,49 @@ function App() {
                     <SocialLinks className="hero-socials" />
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section className="about-us" aria-labelledby="aboutUsTitle">
+              <div className="about-us-copy">
+                <div className="tiny">who are we?</div>
+                <h2 id="aboutUsTitle">
+                  <Letters text="a" />
+                  <span className="hl">
+                    <Letters text="girls-only" start={1} />
+                  </span>
+                  <Letters text="tech community" start={11} />
+                </h2>
+                <p>
+                  a <span className="hl">comfortable space</span> to learn tech with
+                  other girls. meet girls who are building too, make{" "}
+                  <span className="hl">new friends</span>, find{" "}
+                  <span className="hl">teammates</span> and learn together. we keep our
+                  meetups <span className="hl">small</span> so everyone gets heard, with
+                  guidance from <span className="hl">malaysian women in tech</span>.
+                </p>
+              </div>
+              <div className="about-photos">
+                <figure className="hero-polaroid hero-polaroid-left">
+                  <button
+                    type="button"
+                    className="polaroid-open"
+                    aria-label="Enlarge group photo"
+                    aria-haspopup="dialog"
+                    onClick={() => openLightbox(heroPolaroids, 0)}
+                  >
+                    <img
+                      src="/events/12.09.2026/hero-group.jpg"
+                      alt="Group photo of all girls at the Girls Only Vibe Code Session"
+                      width="5712"
+                      height="4284"
+                    />
+                    <span className="photo-zoom-hint" aria-hidden="true">
+                      view photo ↗
+                    </span>
+                  </button>
+                  <figcaption>better together ♡</figcaption>
+                </figure>
                 <figure className="hero-polaroid hero-polaroid-right">
                   <button
                     type="button"
@@ -1193,51 +1247,42 @@ function App() {
                 </figure>
                 <StickerLayer />
               </div>
-              <TextLoop
-                text="Create ✦ Learn ✦ Build ✦ Support"
-                shape="wave"
-                speed={90}
-                direction="forward"
-                separator="✦"
-                curviness={62}
-                fontSize={50}
-                fontWeight={800}
-                letterSpacing={2}
-                uppercase
-                color="#ffffff"
-                ribbon
-                ribbonColor="#A83AC2ff"
-                ribbonWidth={66}
-              />
             </section>
 
-            <section className="about-us" aria-labelledby="aboutUsTitle">
-              <div className="about-us-copy">
-                <div className="tiny">who are we?</div>
-                <h2 id="aboutUsTitle">
-                  <Letters text="a" />
-                  <span className="hl">
-                    <Letters text="girls-only" start={1} />
-                  </span>
-                  <Letters text="tech community" start={11} />
-                </h2>
-                <p>
-                  a <span className="hl">comfortable space</span> to learn tech with
-                  other girls. meet girls who are building too, make{" "}
-                  <span className="hl">new friends</span>, find{" "}
-                  <span className="hl">teammates</span> and learn together. we keep our
-                  meetups <span className="hl">small</span> so everyone gets heard, with
-                  guidance from <span className="hl">malaysian women in tech</span>.
-                </p>
+            <section className="founders" aria-labelledby="foundersTitle">
+              <div className="founders-head">
+                <div className="tiny">meet the founders</div>
+                <h2 id="foundersTitle">the girls behind girlcode</h2>
               </div>
-              <div className="about-us-art-wrap">
-                <img
-                  className="about-us-art"
-                  src="/stickers/about-laptop-girl.png"
-                  alt="hand-drawn girl coding on her laptop with a coffee"
-                />
-                {ABOUT_FLOWERS.map((flower, i) => (
-                  <Flower key={i} {...flower} />
+              <div className="founders-strip">
+                {founders.map((f, i) => (
+                  <article
+                    className={`founder${openFounder === f.name ? " open" : ""}`}
+                    key={f.name}
+                    tabIndex={0}
+                    style={{ "--i": i }}
+                    onClick={() => setOpenFounder(openFounder === f.name ? null : f.name)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenFounder(openFounder === f.name ? null : f.name);
+                      }
+                    }}
+                  >
+                    <div className="founder-bg" data-tone={f.tone} />
+                    <img className="founder-avatar founder-photo" src={f.photo} alt={f.fullName} draggable={false} />
+                    <span className="founder-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="founder-info">
+                      <span className="founder-role">{f.role}</span>
+                      <h3>{f.fullName}</h3>
+                      <p>{f.about}</p>
+                      {safeLinkedIn(f.linkedin) && (
+                        <a className="founder-link" href={safeLinkedIn(f.linkedin)} target="_blank" rel="noopener noreferrer">
+                          LinkedIn ↗
+                        </a>
+                      )}
+                    </div>
+                  </article>
                 ))}
               </div>
             </section>
@@ -1454,6 +1499,24 @@ function App() {
           </div>
         ) : (
           <div className="view-container view-fade-in">
+            <div className="hero-ribbon gallery-ribbon">
+              <TextLoop
+                  text="Create ✦ Learn ✦ Build ✦ Support"
+                  shape="wave"
+                  speed={90}
+                  direction="forward"
+                  separator="✦"
+                  curviness={62}
+                  fontSize={50}
+                  fontWeight={800}
+                  letterSpacing={2}
+                  uppercase
+                  color="#ffffff"
+                  ribbon
+                  ribbonColor="#A83AC2ff"
+                  ribbonWidth={66}
+                />
+            </div>
             <EventGallery
               memories={memories}
               onOpenPhoto={openLightbox}
