@@ -4414,7 +4414,7 @@ footer.site-footer {
   overflow: hidden;
   opacity: 1;
   color: var(--deep-plum);
-  background: url("/footer-bg.jpg") center bottom / cover no-repeat, #fbf5f8;
+  background: url("/footer-bg.jpg") center bottom / cover no-repeat, #fdf6fa;
   box-shadow: 0 24px 60px rgba(113, 94, 200, .16)
 }
 
@@ -4486,3 +4486,12 @@ footer.site-footer {
 }
 @media (max-width: 860px) { .footer-watermark { font-size: 21vw; top: 38% } }
 @media (max-width: 600px) { .footer-watermark { display: none } }
+
+/* footer art (16:9): keep it whole, anchored to the bottom so the tree clears the logo and links */
+footer.site-footer { background: url("/footer-bg.jpg") center bottom / 100% auto no-repeat, #fefefe }
+@media (max-width: 860px) {
+  footer.site-footer { background: url("/footer-bg.jpg") 28% bottom / auto 56% no-repeat, linear-gradient(#fefefe 0 55%, #fdf3fa) }
+}
+@media (max-width: 860px) {
+  footer.site-footer { background: url("/footer-bg.jpg") 26% calc(100% - 70px) / auto 52% no-repeat, linear-gradient(#fefefe 0 70%, #8f6fd0) }
+}
