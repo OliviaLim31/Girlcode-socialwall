@@ -4561,22 +4561,17 @@ html, body { overflow-x: clip }
 @media (max-width: 860px) { footer.site-footer { margin-top: 64px; border-radius: 0 } }
 .shell { margin-bottom: 0 }
 
-/* footer top fades into the page instead of a hard edge */
-footer.site-footer {
-  padding-top: 110px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 120px);
+/* footer: no fog over the art. A cream-to-white band sits above the whole illustration, so the tree stays crisp */
+@media (min-width: 861px) {
+  footer.site-footer {
+    padding-top: 90px;
+    min-height: calc(56.25vw + 150px);
+    -webkit-mask-image: none;
+    mask-image: none;
+    background: url("/footer-bg.jpg") center bottom / 100% auto no-repeat, linear-gradient(#fff6f2 0, #fefefe 150px);
+  }
 }
 
-/* footer logo: frosted white backing so it reads over the tree */
-.site-footer .footer-brand {
-  align-self: flex-start;
-  padding: 10px 18px 10px 12px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, .82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
 .footer-brand-text span { opacity: 1; color: var(--deep-plum) }
 
 /* dancing mascot in the top-right corner of the soundtrack section */
@@ -4599,3 +4594,113 @@ footer.site-footer {
 
 /* no white panel behind the "who's here?" heading and filters */
 .toolbar { background: none; border-radius: 0; box-shadow: none; backdrop-filter: none }
+
+/* who are we: a bit bigger on desktop and tablet-landscape */
+@media (min-width: 861px) {
+  .about-us { max-width: 1100px; gap: 36px }
+  .about-us h2 { font-size: clamp(40px, 4.6vw, 58px) }
+  .about-us p { font-size: clamp(17px, 1.3vw, 19px) }
+  .about-photos { min-height: clamp(410px, 34vw, 480px) }
+  .about-photos .hero-polaroid { width: clamp(220px, 19vw, 250px) }
+}
+
+/* ===== social wall cards: dreamy purple ID cards ===== */
+.person-card {
+  --c1: 224, 158, 241;
+  color: var(--deep-plum);
+  border-radius: 26px;
+  border: 1.5px solid rgba(255, 255, 255, .85);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(var(--c1), .55), transparent 60%),
+    linear-gradient(160deg, rgba(var(--c1), .42), #fbf7ff 78%);
+  box-shadow: 0 14px 34px -8px rgba(var(--c1), .55), 0 4px 12px rgba(42, 26, 110, .08);
+}
+.person-card.rose  { --c1: 224, 158, 241; background: none }
+.person-card.olive { --c1: 149, 153, 214; background: none }
+.person-card.lilac { --c1: 113, 116, 199; background: none }
+.person-card.cream { --c1: 242, 215, 249; background: none }
+.person-card.blue  { --c1: 190, 194, 230; background: none }
+.person-card.rose, .person-card.olive, .person-card.lilac, .person-card.cream, .person-card.blue {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(var(--c1), .55), transparent 60%),
+    linear-gradient(160deg, rgba(var(--c1), .42), #fbf7ff 78%);
+}
+.person-card::before,
+.person-card.rose::before, .person-card.olive::before, .person-card.lilac::before,
+.person-card.cream::before, .person-card.blue::before {
+  background: rgba(255, 255, 255, .78);
+  border-top: 1px dashed rgba(42, 26, 110, .22);
+}
+.person-card:hover {
+  transform: translateY(-6px) rotate(-.4deg);
+  border-color: #fff;
+  box-shadow: 0 26px 48px -10px rgba(var(--c1), .7), 0 8px 18px rgba(42, 26, 110, .12);
+}
+.id-card-label {
+  border-color: rgba(42, 26, 110, .35);
+  background: rgba(255, 255, 255, .85);
+  color: var(--deep-plum);
+}
+.id-card-markers i { border-color: rgba(42, 26, 110, .5); background: #fff }
+.id-card-field-label { color: var(--deep-plum); opacity: .55 }
+.id-card-name h3 { font: 800 22px/1.05 var(--title-font); color: var(--deep-plum) }
+.id-card-handle { color: rgba(42, 26, 110, .85); font-weight: 600 }
+.about { color: rgba(42, 26, 110, .8) }
+.song-chip { background: rgba(255, 255, 255, .7); box-shadow: 0 2px 6px rgba(42, 26, 110, .08) }
+.card-open { color: var(--deep-plum); font-weight: 800 }
+.portrait-wrap {
+  border: 3px solid #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(42, 26, 110, .2), 0 0 0 1px rgba(42, 26, 110, .08);
+}
+.person-card:hover .portrait-wrap { box-shadow: 0 12px 24px rgba(42, 26, 110, .28), 0 0 0 1px rgba(42, 26, 110, .1) }
+.id-card-barcode {
+  background: repeating-linear-gradient(90deg, var(--deep-plum) 0 2px, transparent 2px 4px, var(--deep-plum) 4px 5px, transparent 5px 8px, var(--deep-plum) 8px 11px, transparent 11px 14px);
+  opacity: .8;
+}
+.note-count-pill { background: rgba(var(--c1), .35); color: var(--deep-plum); opacity: 1; font-weight: 700 }
+.card-open::after { border-radius: 26px }
+
+/* founders: one smooth gradient flowing across all four slices */
+.founders-strip { background: linear-gradient(100deg, #cfe0fb 0%, #b9bdf0 30%, #cdb9f6 62%, #f2cdee 100%) }
+.founder-bg,
+.founder-bg[data-tone] { background: none }
+@media (max-width: 760px) {
+  .founders-strip { background: linear-gradient(180deg, #cfe0fb 0%, #b9bdf0 32%, #cdb9f6 66%, #f2cdee 100%) }
+}
+
+/* founders: white diagonal divider between slices */
+.founder:not(:first-child)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #fff;
+  clip-path: polygon(var(--cut) 0, calc(var(--cut) + 12px) 0, 12px 100%, 0 100%);
+}
+@media (max-width: 760px) {
+  .founder:not(:first-child)::after { clip-path: polygon(0 28px, 100% 0, 100% 10px, 0 38px) }
+}
+.site-footer .footer-brand { background: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 0; border-radius: 0 }
+
+/* footer watermark: gradient fill, darker purple at the top */
+.footer-watermark {
+  color: transparent;
+  background: linear-gradient(180deg, rgba(120, 90, 200, .42) 0%, rgba(160, 130, 225, .24) 55%, rgba(224, 190, 240, .08) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.footer-col li a { color: inherit; text-decoration: none }
+.footer-col li a:hover { text-decoration: underline }
+
+/* founders heading: logo wordmark instead of the word "girlcode" */
+.founders-head h2 { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 .2em }
+.founders-wordmark {
+  height: clamp(84px, 13vw, 150px);
+  width: auto;
+  margin: -10px 0;
+  mix-blend-mode: multiply;
+  user-select: none;
+}

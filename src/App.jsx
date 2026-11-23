@@ -422,7 +422,7 @@ function SocialLinks({ className }) {
   return (
     <nav className={`social-links ${className}`} aria-label="Our socials">
       <a
-        href="https://www.linkedin.com/company/girlcode-kl"
+        href="https://www.linkedin.com/company/girlcode.my/"
         target="_blank"
         rel="noreferrer"
         aria-label="GirlCode on LinkedIn"
@@ -1330,7 +1330,16 @@ function App() {
             <section className="founders" aria-labelledby="foundersTitle">
               <div className="founders-head">
                 <div className="tiny">meet the founders</div>
-                <h2 id="foundersTitle">the girls behind girlcode</h2>
+                <h2 id="foundersTitle" aria-label="the girls behind girlcode">
+                  <span aria-hidden="true">the girls behind</span>
+                  <img
+                    className="founders-wordmark"
+                    src="/girlcode-wordmark.png"
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                  />
+                </h2>
               </div>
               <div className="founders-strip">
                 {founders.map((f, i) => (
@@ -1638,9 +1647,10 @@ function App() {
               <div className="footer-col">
                 <h4>Connect</h4>
                 <ul>
-                  <li>LinkedIn</li>
-                  <li>Instagram</li>
-                  <li>WhatsApp</li>
+                  <li><a href="https://www.linkedin.com/company/girlcode.my/" target="_blank" rel="noreferrer">LinkedIn</a></li>
+                  <li><a href="https://www.instagram.com/girlcode.my/" target="_blank" rel="noreferrer">Instagram</a></li>
+                  <li><a href="https://chat.whatsapp.com/FAGxBm4MvDYHg3xnuwvptv" target="_blank" rel="noreferrer">WhatsApp</a></li>
+                  <li><a href="https://linktr.ee/girlcode.my" target="_blank" rel="noreferrer">Linktree</a></li>
                   <li>Newsletter</li>
                   <li>Partners</li>
                 </ul>
