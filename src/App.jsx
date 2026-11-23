@@ -1535,6 +1535,13 @@ function App() {
               className="music-gallery"
               aria-labelledby="musicGalleryTitle"
             >
+              <img
+                className="music-mascot"
+                src="/music-mascot.gif"
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+              />
               <div className="music-gallery-head">
                 <div>
                   <div className="tiny">our soundtrack</div>
