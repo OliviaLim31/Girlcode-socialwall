@@ -98,8 +98,19 @@ export default function TextLoop({
       >
         <defs>
           <path id={pathId} d={path} />
+          <linearGradient id={`${pathId}-grad`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1440" y2="0">
+            <stop offset="0" stopColor="#5a52c4" />
+            <stop offset=".5" stopColor="#a83ac2" />
+            <stop offset="1" stopColor="#d36be3" />
+          </linearGradient>
         </defs>
-        {ribbon && <use className="text-loop__ribbon" href={`#${pathId}`} />}
+        {ribbon && (
+          <use
+            className="text-loop__ribbon"
+            href={`#${pathId}`}
+            style={{ stroke: `url(#${pathId}-grad)` }}
+          />
+        )}
         <text className="text-loop__text">
           <textPath href={`#${pathId}`} startOffset="0%">
             {renderedText}

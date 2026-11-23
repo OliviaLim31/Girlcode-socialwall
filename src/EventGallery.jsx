@@ -142,6 +142,7 @@ export const eventDates = [
 ];
 
 export default function EventGallery({
+  ribbon,
   memories,
   onOpenPhoto,
   onOpenAddMemory,
@@ -186,6 +187,8 @@ export default function EventGallery({
             a scrapbook of candid laughs, iced matcha, stickers, and screens glowing with code ♡
           </p>
         </div>
+
+        {ribbon}
 
         <div className="gallery-toolbar">
           <div className="seg-control" role="tablist" aria-label="Filter by meetup event">

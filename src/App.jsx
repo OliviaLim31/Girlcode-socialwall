@@ -1594,6 +1594,8 @@ function App() {
           </div>
         ) : (
           <div className="view-container view-fade-in">
+            <EventGallery
+              ribbon={
             <div className="hero-ribbon gallery-ribbon">
               <TextLoop
                   text="Create ✦ Learn ✦ Build ✦ Support"
@@ -1612,7 +1614,7 @@ function App() {
                   ribbonWidth={66}
                 />
             </div>
-            <EventGallery
+              }
               memories={memories}
               onOpenPhoto={openLightbox}
               onOpenAddMemory={openAddMemory}

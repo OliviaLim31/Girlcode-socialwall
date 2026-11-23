@@ -4707,3 +4707,6 @@ html, body { overflow-x: clip }
 
 /* founders: no purple bar beside the bio */
 .founder-info p { border-left: 0; padding-left: 0 }
+
+/* gallery: wavy ribbon sits under the title and subtitle */
+.gallery-header .gallery-ribbon { margin: 44px 0 32px; width: 100% }
