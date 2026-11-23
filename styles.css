@@ -321,7 +321,7 @@ body:before {
 }
 
 :root {
-  --title-font: "Feather Bold", "Nunito", sans-serif
+  --title-font: "Baloo 2", "Feather Bold", "Nunito", sans-serif
 }
 
 .word {
@@ -4704,3 +4704,6 @@ html, body { overflow-x: clip }
   mix-blend-mode: multiply;
   user-select: none;
 }
+
+/* founders: no purple bar beside the bio */
+.founder-info p { border-left: 0; padding-left: 0 }

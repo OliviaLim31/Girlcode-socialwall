@@ -1,8 +1,8 @@
-# GirlCode Social Wall
+# GirlCode Official Website
 
-> Made for girls who build. A scrapbook-style social wall for the GirlCode community in Kuala Lumpur.
+> Made for girls who build. The official website of the GirlCode community in Kuala Lumpur.
 
-![GirlCode social wall hero](public/hero-bg.jpg)
+![GirlCode Official Website hero](public/hero-bg.jpg)
 
 ## Features
 

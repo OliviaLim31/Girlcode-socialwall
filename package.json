@@ -1,7 +1,7 @@
 {
   "name": "girlcode-socialwall",
   "version": "1.0.0",
-  "description": "A one-page social wall for the Girls' Vibe Coding session.",
+  "description": "The official GirlCode website.",
   "main": "src/main.jsx",
   "scripts": {
     "dev": "vite",
