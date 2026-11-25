@@ -63,6 +63,17 @@ const initialProfiles = [
   ...seedProfiles.filter((profile) => profile.id !== "seed-2"),
 ];
 
+const FOUNDER_DETAILS = [
+  { name: "Zhi Wei", fullName: "Tan Zhi Wei", role: "Founder", photo: "/founders/zhiwei.webp" },
+  { name: "Edwina", fullName: "Edwina Hon", role: "Co-founder", photo: "/founders/edwina.webp" },
+  { name: "Hana", fullName: "Hana Tang", role: "Co-founder", photo: "/founders/hana.webp" },
+  { name: "Olivia", fullName: "Olivia Lim", role: "Co-founder", photo: "/founders/olivia.webp" },
+];
+const founders = FOUNDER_DETAILS.map((details) => ({
+  ...seedProfiles.find((profile) => profile.name === details.name),
+  ...details,
+}));
+
 const tones = ["rose", "olive", "lilac", "cream", "blue"];
 const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").replace(
   /\/$/,
@@ -538,6 +549,7 @@ function App() {
   });
 
   const [activePerson, setActivePerson] = useState(null);
+  const [openFounder, setOpenFounder] = useState(null);
   const [query, setQuery] = useState("");
   const [selectedTone, setSelectedTone] = useState("all");
   const [toast, setToast] = useState("");
@@ -1072,33 +1084,6 @@ function App() {
             </button>
           </nav>
 
-          <div className="site-search">
-            <span aria-hidden="true">⌕</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              type="search"
-              placeholder={
-                activeTab === "wall"
-                  ? "find someone or vibe..."
-                  : "search memories or tags..."
-              }
-              autoComplete="off"
-              aria-label="Search"
-            />
-            {query && (
-              <button
-                type="button"
-                className="search-clear-btn"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                title="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
-
           <button
             className="nav-add"
             onClick={activeTab === "wall" ? openAddForm : openAddMemory}
@@ -1407,6 +1392,75 @@ function App() {
               </p>
             )}
 
+            <section className="founders" aria-labelledby="foundersTitle">
+              <div className="founders-head">
+                <div className="tiny">meet the founders</div>
+                <h2 id="foundersTitle" aria-label="the girls behind girlcode">
+                  <span aria-hidden="true">the girls behind</span>
+                  <img
+                    loading="lazy"
+                    decoding="async"
+                    className="founders-wordmark"
+                    src="/girlcode-wordmark.png"
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                  />
+                </h2>
+              </div>
+              <div className="founders-strip">
+                {founders.map((founder, index) => (
+                  <article
+                    className={`founder${openFounder === founder.name ? " open" : ""}`}
+                    key={founder.name}
+                    tabIndex={0}
+                    style={{ "--i": index }}
+                    onClick={() =>
+                      setOpenFounder(
+                        openFounder === founder.name ? null : founder.name,
+                      )
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setOpenFounder(
+                          openFounder === founder.name ? null : founder.name,
+                        );
+                      }
+                    }}
+                  >
+                    <div className="founder-bg" data-tone={founder.tone} />
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      className="founder-avatar founder-photo"
+                      src={founder.photo}
+                      alt={founder.fullName}
+                      draggable={false}
+                    />
+                    <span className="founder-num" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="founder-info">
+                      <span className="founder-role">{founder.role}</span>
+                      <h3>{founder.fullName}</h3>
+                      <p>{founder.about}</p>
+                      {safeLinkedIn(founder.linkedin) && (
+                        <a
+                          className="founder-link"
+                          href={safeLinkedIn(founder.linkedin)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          LinkedIn ↗
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+
             <section
               className="music-gallery"
               aria-labelledby="musicGalleryTitle"
@@ -1466,21 +1520,101 @@ function App() {
           </div>
         )}
 
-        <footer>
-          <div className="footer-brand">
-            <img src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
-            <span>
-              {activeTab === "wall"
-                ? "made for one room, one afternoon, and a lot of new mutuals ✦"
-                : "girls' vibe coding moments captured with love ♡"}
-            </span>
+        <footer className="site-footer">
+          <div className="footer-top">
+            <div className="footer-brand">
+              <img
+                loading="lazy"
+                decoding="async"
+                src="/logo.png"
+                alt="Girl Code logo"
+                className="footer-logo-img"
+              />
+              <div className="footer-brand-text">
+                <strong>GirlCode</strong>
+                <span>Made for girls who build</span>
+              </div>
+            </div>
+            <div className="footer-cols">
+              <div className="footer-col">
+                <h4>Company</h4>
+                <ul>
+                  <li>Home</li>
+                  <li>Our Story</li>
+                  <li>Founders</li>
+                  <li>Events</li>
+                  <li>Community</li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Connect</h4>
+                <ul>
+                  <li>
+                    <a
+                      href="https://www.linkedin.com/company/girlcode.my/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      LinkedIn
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.instagram.com/girlcode.my/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Instagram
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://chat.whatsapp.com/FAGxBm4MvDYHg3xnuwvptv"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://linktr.ee/girlcode.my"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Linktree
+                    </a>
+                  </li>
+                  <li>Newsletter</li>
+                  <li>Partners</li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Support</h4>
+                <ul>
+                  <li>Terms of Service</li>
+                  <li>Privacy Policy</li>
+                  <li>Code of Conduct</li>
+                  <li>Contact Us</li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <SocialLinks className="footer-socials" />
-          <button
-            onClick={activeTab === "wall" ? openAddForm : openAddMemory}
-          >
-            {activeTab === "wall" ? "add yourself ↗" : "share memory ↗"}
-          </button>
+          <div className="footer-watermark" aria-hidden="true">
+            GirlCode
+          </div>
+          <div className="footer-bar">
+            <span>&copy; 2026 GirlCode. All rights reserved.</span>
+            <div className="footer-bar-actions">
+              <button
+                type="button"
+                onClick={activeTab === "wall" ? openAddForm : openAddMemory}
+              >
+                {activeTab === "wall" ? "add yourself ↗" : "share memory ↗"}
+              </button>
+              <SocialLinks className="footer-socials" />
+            </div>
+          </div>
         </footer>
       </main>
 
