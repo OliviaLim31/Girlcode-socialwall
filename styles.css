@@ -4204,7 +4204,7 @@ footer.site-footer {
     margin-top: 64px;
     padding: 36px 24px 0;
     border-radius: 0;
-    background: url("/footer-bg.jpg") 26% calc(100% - 70px) / auto 52% no-repeat, linear-gradient(#fefefe 0 70%, #8f6fd0)
+    background: url("/footer-bg.jpg") center calc(100% - 70px) / 100% auto no-repeat, linear-gradient(#fefefe 0 70%, #8f6fd0)
   }
 
   .site-footer .footer-top {
@@ -4268,4 +4268,41 @@ body {
 
 .shell {
   margin-bottom: 0
+}
+
+.music-gallery {
+  border-radius: 40px;
+  background: linear-gradient(180deg, #ece6ff, #f7e9fb);
+  box-shadow: 0 24px 60px rgba(113, 94, 200, .14)
+}
+
+.music-mascot {
+  position: absolute;
+  z-index: 2;
+  top: clamp(-44px, -3vw, -18px);
+  right: clamp(8px, 3vw, 40px);
+  width: clamp(84px, 11vw, 150px);
+  height: auto;
+  pointer-events: none;
+  user-select: none
+}
+
+.music-gallery-head p {
+  margin-right: clamp(90px, 13vw, 170px)
+}
+
+@media(max-width:760px) {
+  .music-mascot {
+    top: -34px;
+    right: 6px;
+    width: 84px
+  }
+
+  .music-gallery-head {
+    padding-right: 80px
+  }
+
+  .music-gallery-head p {
+    margin-right: 0
+  }
 }
