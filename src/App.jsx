@@ -1291,7 +1291,7 @@ function App() {
                     aria-haspopup="dialog"
                     onClick={() => openLightbox(heroPolaroids, 0)}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src="/events/12.09.2026/hero-group.jpg"
                       alt="Group photo of all girls at the Girls Only Vibe Code Session"
                       width="5712"
@@ -1311,7 +1311,7 @@ function App() {
                     aria-haspopup="dialog"
                     onClick={() => openLightbox(heroPolaroids, 1)}
                   >
-                    <img
+                    <img loading="lazy" decoding="async"
                       src="/events/12.09.2026/event-poster.jpg"
                       alt="Laptop displaying the Girls Only Vibe Code Session poster and event schedule"
                       width="3024"
@@ -1332,7 +1332,7 @@ function App() {
                 <div className="tiny">meet the founders</div>
                 <h2 id="foundersTitle" aria-label="the girls behind girlcode">
                   <span aria-hidden="true">the girls behind</span>
-                  <img
+                  <img loading="lazy" decoding="async"
                     className="founders-wordmark"
                     src="/girlcode-wordmark.png"
                     alt=""
@@ -1357,7 +1357,7 @@ function App() {
                     }}
                   >
                     <div className="founder-bg" data-tone={f.tone} />
-                    <img className="founder-avatar founder-photo" src={f.photo} alt={f.fullName} draggable={false} />
+                    <img loading="lazy" decoding="async" className="founder-avatar founder-photo" src={f.photo} alt={f.fullName} draggable={false} />
                     <span className="founder-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                     <div className="founder-info">
                       <span className="founder-role">{f.role}</span>
@@ -1629,7 +1629,7 @@ function App() {
         <footer className="site-footer">
           <div className="footer-top">
             <div className="footer-brand">
-              <img src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
+              <img loading="lazy" decoding="async" src="/logo.png" alt="Girl Code logo" className="footer-logo-img" />
               <div className="footer-brand-text">
                 <strong>GirlCode</strong>
                 <span>Made for girls who build</span>
