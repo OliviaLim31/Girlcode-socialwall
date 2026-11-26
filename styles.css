@@ -4710,3 +4710,11 @@ html, body { overflow-x: clip }
 
 /* gallery: wavy ribbon sits under the title and subtitle */
 .gallery-header .gallery-ribbon { margin: 44px 0 32px; width: 100% }
+
+/* official brand fills and solid glyphs */
+.social-links a:nth-child(1) { --brand: #0a66c2 }
+.social-links a:nth-child(2) { --brand: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%) }
+.social-links a:nth-child(3) { --brand: #25d366 }
+.social-links a svg.social-solid { fill: currentColor; stroke: none }
+.about-us, .founders, .music-gallery { scroll-margin-top: 20px }
+.footer-col li a { cursor: pointer }

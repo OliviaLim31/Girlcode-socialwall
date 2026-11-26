@@ -428,8 +428,8 @@ function SocialLinks({ className }) {
         aria-label="GirlCode on LinkedIn"
         title="LinkedIn"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5.2 8.6H2.4V21h2.8V8.6ZM3.8 7.3a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4ZM21.6 13.9c0-3.7-2-5.5-4.7-5.5a4.1 4.1 0 0 0-3.7 2v-1.8H10.4V21h2.8v-6.1c0-1.6.3-3.2 2.4-3.2 2 0 2.1 1.9 2.1 3.3V21h2.8l1.1-7.1Z" />
+        <svg className="social-solid" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z" />
         </svg>
       </a>
       <a
@@ -440,9 +440,9 @@ function SocialLinks({ className }) {
         title="Instagram"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" />
-          <circle cx="12" cy="12" r="4.1" />
-          <circle className="social-icon-fill" cx="17.7" cy="6.6" r="1.1" />
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+          <circle cx="12" cy="12" r="4.4" />
+          <circle className="social-icon-fill" cx="17.6" cy="6.4" r="1.3" />
         </svg>
       </a>
       <a
@@ -452,9 +452,8 @@ function SocialLinks({ className }) {
         aria-label="Join GirlCode on WhatsApp"
         title="WhatsApp"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M20.2 11.7a8.1 8.1 0 0 1-12 7.1L3 20l1.3-5A8.1 8.1 0 1 1 20.2 11.7Z" />
-          <path d="M8.2 7.7c.2-.5.5-.5.8-.5h.5c.2 0 .4.1.5.4l.8 1.9c.1.3.1.5-.1.7l-.6.7c-.2.2-.2.4 0 .7.6 1 1.4 1.8 2.5 2.4.3.2.5.2.7-.1l.8-.9c.2-.2.4-.3.7-.2l1.8.9c.3.1.4.3.4.5 0 .3-.2 1.4-.9 1.9-.5.5-1.2.7-2 .6-1.1-.1-2.5-.7-4.1-2.1-1.8-1.6-2.8-3.5-2.9-4.7-.1-1 .4-1.8 1.1-2.2Z" />
+        <svg className="social-solid" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
         </svg>
       </a>
     </nav>
@@ -526,6 +525,18 @@ function App() {
     };
     if (document.startViewTransition) document.startViewTransition(swap);
     else swap();
+  };
+
+  // footer links: jump to a section (switching tab first if needed)
+  const goToSection = (e, selector, tab = "wall") => {
+    e.preventDefault();
+    if (tab !== activeTab)
+      flushSync(() => {
+        setActiveTab(tab);
+        setQuery("");
+      });
+    if (!selector) return scrollTo({ top: 0, behavior: "smooth" });
+    document.querySelector(selector)?.scrollIntoView({ behavior: "smooth" });
   };
 
   // People State
@@ -1637,13 +1648,26 @@ function App() {
             </div>
             <div className="footer-cols">
               <div className="footer-col">
-                <h4>Company</h4>
+                <h4>Community</h4>
                 <ul>
-                  <li>Home</li>
-                  <li>Our Story</li>
-                  <li>Founders</li>
-                  <li>Events</li>
-                  <li>Community</li>
+                  {[
+                    ["Home"],
+                    ["Our Story", ".about-us"],
+                    ["Founders", ".founders"],
+                    ["Events", null],
+                    ["Photos", "", "gallery"],
+                    ["Music", ".music-gallery"],
+                  ].map(([label, selector, tab]) => (
+                    <li key={label}>
+                      {selector === null ? (
+                        label
+                      ) : (
+                        <a href="#" onClick={(e) => goToSection(e, selector, tab)}>
+                          {label}
+                        </a>
+                      )}
+                    </li>
+                  ))}
                 </ul>
               </div>
               <div className="footer-col">
